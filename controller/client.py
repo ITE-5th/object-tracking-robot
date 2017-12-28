@@ -5,12 +5,12 @@ class Client:
 
     def __init__(self, host, port=1234) -> None:
         super().__init__()
-        self.HostName = host
-        self.Port = port
-        self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.host_name = host
+        self.port = port
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send(self, message):
-        self.clientSocket.sendto(message.encode(), (self.HostName, self.Port))
+        self.client_socket.sendto(message.encode(), (self.host_name, self.port))
 
 
 # TEST CLIENT

@@ -3,20 +3,20 @@ import sys
 import threading
 
 import time
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
-from Controller.ObjectTracker import Tracker
-from Controller.client import Client
-from Controller.form import Ui_Dialog
+from controller.object_tracker.color_based_object_tracker import ColorBasedObjectTracker
+from controller.client import Client
+from controller.form import Ui_Dialog
 
 
-class MainMenu(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     RUN = 'run'
     STOP = 'stop'
     MANUAL = 'manual'
 
     def __init__(self, host='raspberrypi', port=1234, url=None):
-        super(MainMenu, self).__init__()
+        super().__init__()
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
 
@@ -29,7 +29,7 @@ class MainMenu(QtWidgets.QMainWindow):
         self.show()
         self.client = Client(host=host, port=port)
 
-        self.object_tracker = Tracker(video_url=url, buffer_size=64)
+        self.object_tracker = ColorBasedObjectTracker(video_url=url, buffer_size=64)
         self.status = self.STOP
 
     def keyPressEvent(self, event1):
@@ -164,7 +164,7 @@ class MainMenu(QtWidgets.QMainWindow):
 
 def main(ip, port, url):
     app = QtWidgets.QApplication(sys.argv)
-    ex = MainMenu(host=ip, port=port, url=url)
+    ex = MainWindow(host=ip, port=port, url=url)
     app.exec_()
 
 

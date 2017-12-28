@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 import threading
 
 import netifaces as ni
 import json
 
 import time
-from MotorController import QuadMotorController
-from server import Server
+from raspberry.motor_controller import QuadMotorController
+from raspberry.server import Server
 
 t = 0.1
 speed = None
@@ -134,7 +133,7 @@ if __name__ == '__main__':
     ip = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
     server = Server(host=ip)
     motor_controller = QuadMotorController()
-    print('Server is online \nHost Name : {}:{}'.format(server.HostName, server.Port))
+    print('Server is online \nHost Name : {}:{}'.format(server.host_name, server.port))
     try:
         movement_thread = threading.Thread(target=movement)
         movement_thread.start()
