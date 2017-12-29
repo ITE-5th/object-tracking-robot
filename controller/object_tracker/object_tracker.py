@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
 from abc import ABCMeta, abstractmethod
 from collections import deque
@@ -30,15 +31,15 @@ class ObjectTracker(metaclass=ABCMeta):
             self.is_working = False
 
     def predict_next_position(self):
-        if len(self.positions) <= 30:
+        if len(self.positions) <= 5:
             return
-        svr = SVR()
+        regressor = LinearRegression()
         positions = list(reversed(self.positions))
         x = np.arange(1, len(positions) + 1).reshape(-1, 1)
         y = [[x, y, width, height] for x, y, width, height, _ in positions]
         y = np.array(y)
-        svr.fit(x, y)
-        predicted = svr.predict(np.array([len(self.positions) + self.time_step + 1]))
+        regressor.fit(x, y)
+        predicted = regressor.predict(np.array([[len(self.positions) + self.time_step + 1]]))
         return predicted[0]
 
     @abstractmethod

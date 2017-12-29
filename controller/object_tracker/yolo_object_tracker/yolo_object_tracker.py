@@ -8,7 +8,7 @@ from file_path_manager import FilePathManager
 
 class YoloObjectTracker(ObjectTracker):
 
-    def __init__(self, video_url=0, buffer_size=64, threshold = 0.5, selected_classes=None):
+    def __init__(self, video_url=0, buffer_size=64, threshold=0.5, selected_classes=None):
         super().__init__(video_url, buffer_size)
         if selected_classes is None:
             selected_classes = []
@@ -32,6 +32,9 @@ class YoloObjectTracker(ObjectTracker):
             return False
         sized = cv2.resize(frame, (self.model.width, self.model.height))
         bboxes = do_detect(self.model, sized, self.threshold, 0.4, 1)
+        bboxes = [box for box in bboxes if
+                  self.selected_classes and self.class_names[
+                      box[6] % len(self.class_names)] in self.selected_classes and box[5] >= self.threshold]
         draw_img = plot_boxes_cv2(frame, bboxes, None, self.class_names)
         self.add_to_positions(bboxes, frame)
         cv2.imshow("Image", draw_img)
@@ -52,10 +55,9 @@ class YoloObjectTracker(ObjectTracker):
             prop = box[5]
             index = box[6]
             name = self.class_names[index % len(self.class_names)]
-            if self.selected_classes and name in self.selected_classes:
-                self.positions.appendleft((x, y, width, height, name))
+            self.positions.appendleft((x, y, width, height, name))
 
 
 if __name__ == '__main__':
-    tracker = YoloObjectTracker()
+    tracker = YoloObjectTracker(selected_classes=["remote"])
     tracker.track()
