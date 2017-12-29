@@ -33,7 +33,6 @@ class YoloObjectTracker(ObjectTracker):
         bboxes = do_detect(self.model, sized, 0.5, 0.4, 1)
         draw_img = plot_boxes_cv2(frame, bboxes, None, self.class_names)
         self.add_to_positions(bboxes, frame)
-        print(self.positions)
         cv2.imshow("Image", draw_img)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):

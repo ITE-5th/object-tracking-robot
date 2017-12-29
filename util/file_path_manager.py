@@ -1,8 +1,6 @@
-from config_reader import ConfigReader
-
-
 class FilePathManager:
-    base_dir = ConfigReader.get("base_dir")
+    base_dir = "/home/obada/PycharmProjects/object_tracking_robot"
+
     @staticmethod
     def resolve(path):
         return "{}/{}".format(FilePathManager.base_dir, path)
