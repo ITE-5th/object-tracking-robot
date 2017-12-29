@@ -30,11 +30,11 @@ class ObjectTracker(metaclass=ABCMeta):
             self.is_working = False
 
     def predict_next_position(self):
-        if len(self.positions) <= 1:
+        if len(self.positions) <= 30:
             return
         svr = SVR()
         x = np.arange(1, len(self.positions) + 1).reshape(-1, 1)
-        y = [[x, y, width, height] for (x, y), width, height in self.positions]
+        y = [[x, y, width, height] for x, y, width, height, _ in self.positions]
         y = np.array(y)
         svr.fit(x, y)
         predicted = svr.predict(np.array([len(self.positions) + self.time_step + 1]))
