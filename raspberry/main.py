@@ -10,13 +10,15 @@ from raspberry.server import Server
 t = 0.1
 speed = None
 
+x = 0
+y = 0
 status = ""
-radius = 0
+width = 0
+height = 0
 x_min = 70
 x_max = 200
 maxArea = 800
 minArea = 0
-x = 0
 
 
 def reverse(m_speed=None):
@@ -50,7 +52,7 @@ def stopall():
 
 
 def movement():
-    global status, radius, x_min, x_max, maxArea, minArea, x
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y
     print("started")
 
     while True:
@@ -73,11 +75,12 @@ def movement():
                 # stop = True
                 stopall()
 
-        if "radius" in message:
-            radius = json_message.get("radius")
+        if "width" in message:
             x = json_message.get("x")
-            print("new radius: ", radius)
-            print("new x: ", x)
+            y = json_message.get("y")
+            width = json_message.get("width")
+            height = json_message.get("height")
+            print("x = {}, y = {}, width = {}, height = {}".format(x, y, width, height))
 
         FB = json_message.get("FB")
 
@@ -105,8 +108,9 @@ def movement():
 
 
 def auto_movement():
-    global status, radius, x_min, x_max, maxArea, minArea, x
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y
     while True:
+        area = width * height
         if status == 'run':
             if x < x_min:
                 turnleft(m_speed=speed)
@@ -114,10 +118,10 @@ def auto_movement():
             elif x > x_max:
                 turnright(m_speed=speed)
                 time.sleep(0.1)
-            elif radius < minArea:
+            elif area < minArea:
                 forwards(m_speed=speed)
                 time.sleep(0.2)
-            elif radius > maxArea:
+            elif area > maxArea:
                 reverse(m_speed=speed)
                 time.sleep(0.2)
             else:
@@ -137,7 +141,6 @@ if __name__ == '__main__':
     try:
         movement_thread = threading.Thread(target=movement)
         movement_thread.start()
-
         auto_movement_thread = threading.Thread(target=auto_movement())
         auto_movement_thread.start()
     finally:

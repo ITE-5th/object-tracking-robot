@@ -63,7 +63,7 @@ class ColorBasedObjectTracker(ObjectTracker):
                 cv2.circle(frame, center, 5, (0, 0, 255), -1)
 
         # update the points queue
-        self.positions.appendleft([center, radius])
+        self.positions.appendleft((center[0], center[1], radius, radius, "colored thing"))
 
         # loop over the set of tracked points
         for i in range(1, len(self.positions)):

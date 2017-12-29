@@ -147,14 +147,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.client.send(json_data)
 
     def data_sender(self):
-        verbose = {"radius": "", "x": ""}
+        verbose = {}
         while self.object_tracker.is_working and self.status != self.STOP:
             if len(self.object_tracker.positions) > 0:
                 currentPosition = self.object_tracker.positions[0]
                 if currentPosition[0] is not None:
                     print(currentPosition)
-                    verbose["radius"] = currentPosition[1]
-                    verbose["x"] = currentPosition[0][0]
+                    verbose["x"] = currentPosition[0]
+                    verbose["y"] = currentPosition[1]
+                    verbose["width"] = currentPosition[2]
+                    verbose["height"] = currentPosition[3]
                     json_data = json.dumps(verbose)
                     self.client.send(json_data)
             time.sleep(0.2)
