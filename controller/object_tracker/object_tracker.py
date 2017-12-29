@@ -23,7 +23,7 @@ class ObjectTracker(metaclass=ABCMeta):
         try:
             while self._track(camera):
                 pass
-                # next_position = self.predict_next_position()
+                next_position = self.predict_next_position()
         finally:
             camera.release()
             cv2.destroyAllWindows()
@@ -33,7 +33,7 @@ class ObjectTracker(metaclass=ABCMeta):
         if len(self.positions) <= 30:
             return
         svr = SVR()
-        positions = reversed(self.positions)
+        positions = list(reversed(self.positions))
         x = np.arange(1, len(positions) + 1).reshape(-1, 1)
         y = [[x, y, width, height] for x, y, width, height, _ in positions]
         y = np.array(y)

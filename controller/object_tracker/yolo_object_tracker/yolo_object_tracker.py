@@ -3,7 +3,7 @@ import cv2
 from controller.object_tracker.object_tracker import ObjectTracker
 from controller.object_tracker.yolo_object_tracker.darknet import Darknet
 from controller.object_tracker.yolo_object_tracker.utils import *
-from util.file_path_manager import FilePathManager
+from file_path_manager import FilePathManager
 
 
 class YoloObjectTracker(ObjectTracker):
