@@ -8,11 +8,12 @@ from util.file_path_manager import FilePathManager
 
 class YoloObjectTracker(ObjectTracker):
 
-    def __init__(self, video_url=0, buffer_size=64, selected_classes=None):
+    def __init__(self, video_url=0, buffer_size=64, threshold = 0.5, selected_classes=None):
         super().__init__(video_url, buffer_size)
         if selected_classes is None:
             selected_classes = []
         self.selected_classes = selected_classes
+        self.threshold = threshold
         self.model = Darknet(FilePathManager.resolve("cfg/yolo.cfg"))
         self.model.print_network()
         self.model.load_weights(FilePathManager.resolve("models/yolo.weights"))
@@ -30,7 +31,7 @@ class YoloObjectTracker(ObjectTracker):
         if self.url is None and not grabbed:
             return False
         sized = cv2.resize(frame, (self.model.width, self.model.height))
-        bboxes = do_detect(self.model, sized, 0.5, 0.4, 1)
+        bboxes = do_detect(self.model, sized, self.threshold, 0.4, 1)
         draw_img = plot_boxes_cv2(frame, bboxes, None, self.class_names)
         self.add_to_positions(bboxes, frame)
         cv2.imshow("Image", draw_img)
