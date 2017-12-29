@@ -35,7 +35,7 @@ class YoloObjectTracker(ObjectTracker):
         bboxes = [box for box in bboxes if
                   self.selected_classes and self.class_names[
                       box[6] % len(self.class_names)] in self.selected_classes and box[5] >= self.threshold]
-        draw_img = plot_boxes_cv2(frame, bboxes, None, self.class_names)
+        draw_img, bboxes = plot_boxes_cv2(frame, bboxes, None, self.class_names)
         self.add_to_positions(bboxes, frame)
         cv2.imshow("Image", draw_img)
         key = cv2.waitKey(1) & 0xFF
@@ -46,18 +46,11 @@ class YoloObjectTracker(ObjectTracker):
     def add_to_positions(self, bboxes, img):
         height, width, _ = img.shape
         for box in bboxes:
-            x1 = int(round((box[0] - box[2] / 2.0) * width))
-            y1 = int(round((box[1] - box[3] / 2.0) * height))
-            x2 = int(round((box[0] + box[2] / 2.0) * width))
-            y2 = int(round((box[1] + box[3] / 2.0) * height))
+            x1, y1, x2, y2, prop, name = box
             x, y, width, height = (x1 + x2) // 2, (y1 + y2) // 2, abs(x2 - x1) // 2, abs(y2 - y1) // 2
-            # unused
-            prop = box[5]
-            index = box[6]
-            name = self.class_names[index % len(self.class_names)]
             self.positions.appendleft((x, y, width, height, name))
 
 
 if __name__ == '__main__':
-    tracker = YoloObjectTracker(selected_classes=["remote"])
+    tracker = YoloObjectTracker(selected_classes=["teddy bear"])
     tracker.track()
