@@ -1,5 +1,10 @@
+import json
+
+config = json.load("../config.json")
+
+
 class FilePathManager:
-    base_dir = "/home/obada/PycharmProjects/object_tracking_robot"
+    base_dir = config["base_dir"]
 
     @staticmethod
     def resolve(path):
