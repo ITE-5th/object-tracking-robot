@@ -51,7 +51,7 @@ class YoloObjectTracker(ObjectTracker):
             prop = box[5]
             index = box[6]
             name = self.class_names[index % len(self.class_names)]
-            if len(self.selected_classes) == 0 or name in self.selected_classes:
+            if self.selected_classes and name in self.selected_classes:
                 self.positions.appendleft((x, y, width, height, name))
 
 
