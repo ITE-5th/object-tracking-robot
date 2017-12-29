@@ -33,8 +33,9 @@ class ObjectTracker(metaclass=ABCMeta):
         if len(self.positions) <= 30:
             return
         svr = SVR()
-        x = np.arange(1, len(self.positions) + 1).reshape(-1, 1)
-        y = [[x, y, width, height] for x, y, width, height, _ in self.positions]
+        positions = reversed(self.positions)
+        x = np.arange(1, len(positions) + 1).reshape(-1, 1)
+        y = [[x, y, width, height] for x, y, width, height, _ in positions]
         y = np.array(y)
         svr.fit(x, y)
         predicted = svr.predict(np.array([len(self.positions) + self.time_step + 1]))
