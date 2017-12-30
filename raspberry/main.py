@@ -123,6 +123,7 @@ def auto_movement():
         if status == 'run':
             area = width * height
             speed += pid.update(area)
+            speed = max(0, min(100, speed))
             if x < x_min:
                 turnleft(m_speed=speed)
                 time.sleep(0.1)
