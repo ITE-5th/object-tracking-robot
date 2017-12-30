@@ -1,13 +1,14 @@
 import json
 import sys
 import threading
-
 import time
+
 from PyQt5 import QtCore, QtWidgets
 
-from controller.object_tracker.color_based_object_tracker import ColorBasedObjectTracker
 from controller.client import Client
 from controller.form import Ui_Dialog
+# from controller.object_tracker.yolo_object_tracker.yolo_object_tracker import YoloObjectTracker
+from controller.object_tracker.color_based_object_tracker.color_based_object_tracker import ColorBasedObjectTracker
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -30,6 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.client = Client(host=host, port=port)
 
         self.object_tracker = ColorBasedObjectTracker(video_url=url, buffer_size=64)
+        # self.object_tracker = YoloObjectTracker(video_url=url, buffer_size=64)
         self.status = self.STOP
 
     def keyPressEvent(self, event1):
@@ -173,7 +175,7 @@ def main(ip, port, url):
 if __name__ == '__main__':
     # videoURL = 0
     # videoURL = "./testData/ball_tracking_example.mp4"
-    videoURL = "http://192.168.137.154:8080/stream/video.mjpeg"
-    IP = "192.168.137.154"
+    videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
+    IP = "raspberrypi"
     PORT = 1234
     main(IP, PORT, videoURL)

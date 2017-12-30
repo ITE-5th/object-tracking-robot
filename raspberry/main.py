@@ -3,9 +3,11 @@ import netifaces as ni
 import threading
 import time
 
-from raspberry.motor_controller import QuadMotorController
-from raspberry.pid import PID
-from raspberry.server import Server
+import RPi.GPIO as GPIO
+from motor_controller import QuadMotorController
+from pid import PID
+from range_sensor import RangeSensor
+from server import Server
 
 t = 0.1
 speed = 0
@@ -20,6 +22,18 @@ x_max = 200
 maxArea = 800
 minArea = 0
 pid = PID()
+range_sensor = RangeSensor()
+motor_controller = QuadMotorController()
+
+range_sensor_value = 0
+
+
+def range_sensor_updater():
+    global range_sensor_value
+    print('range Sensor thread is running')
+
+    while True:
+        range_sensor_value = range_sensor.update()
 
 
 def reverse(m_speed=0):
@@ -33,7 +47,8 @@ def reverse(m_speed=0):
 def forwards(m_speed=0):
     if m_speed == 0:
         m_speed = None
-    motor_controller.move_forward(forward_speed=m_speed)
+    if range_sensor_value > 30:
+        motor_controller.move_forward(forward_speed=m_speed)
     # setLEDs(0, 1, 1, 0)
     # print('straight')
 
@@ -124,6 +139,11 @@ def auto_movement():
             area = width * height
             speed += pid.update(area)
             raw_speed = max(0, min(100, speed))
+            print('******************************')
+            print('speed is :{}'.format(speed))
+            print('raw speed is : {}'.format(raw_speed))
+            print('******************************')
+            speed = max(0, min(100, speed))
             if x < x_min:
                 turnleft(m_speed=raw_speed)
                 time.sleep(0.1)
@@ -148,12 +168,20 @@ def auto_movement():
 if __name__ == '__main__':
     ip = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
     server = Server(host=ip)
-    motor_controller = QuadMotorController()
+
     print('Server is online \nHost Name : {}:{}'.format(server.host_name, server.port))
     try:
+        range_sensor_thread = threading.Thread(target=range_sensor_updater)
         movement_thread = threading.Thread(target=movement)
+        auto_movement_thread = threading.Thread(target=auto_movement)
+
+        range_sensor_thread.start()
         movement_thread.start()
-        auto_movement_thread = threading.Thread(target=auto_movement())
         auto_movement_thread.start()
+
+        range_sensor_thread.join()
+        auto_movement_thread.join()
+        movement_thread.join()
     finally:
+        GPIO.cleanup()
         stopall()

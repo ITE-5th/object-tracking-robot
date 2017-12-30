@@ -39,7 +39,7 @@ class ColorBasedObjectTracker(ObjectTracker):
         cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
         if len(cnts) < 1:
-            return
+            return True
         c = max(cnts, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         M = cv2.moments(c)

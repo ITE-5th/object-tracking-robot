@@ -1,6 +1,7 @@
 class PID:
 
-    def __init__(self, target=None, p=2.0, i=0.0, d=1.0, derivator=0, integrator=0, integrator_max=500, integrator_min=-500):
+    def __init__(self, target=None, p=2.0, i=0.0, d=1.0, derivator=0, integrator=0, integrator_max=500,
+                 integrator_min=-500):
         self.target = target
         self.kp = p
         self.ki = i
@@ -31,5 +32,9 @@ class PID:
 if __name__ == '__main__':
     # example
     pid = PID(2)
+    y = 0
+    x = 0
     while True:
-        x = pid.update(3)
+        x += pid.update(y)
+        y += 1
+        print(x)
