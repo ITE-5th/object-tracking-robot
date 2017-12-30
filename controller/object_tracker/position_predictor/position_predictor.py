@@ -6,7 +6,7 @@ class PositionPredictor(metaclass=ABCMeta):
         self.time_step = time_step
 
     def predict(self, positions):
-        positions = list(reversed(positions))
+        positions = list(positions)
         return self._predict(positions)
 
     @abstractmethod
