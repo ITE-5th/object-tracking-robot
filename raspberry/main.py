@@ -123,18 +123,19 @@ def auto_movement():
         if status == 'run':
             area = width * height
             speed += pid.update(area)
-            speed = max(0, min(100, speed))
+            raw_speed = max(0, min(100, speed))
             if x < x_min:
-                turnleft(m_speed=speed)
+                turnleft(m_speed=raw_speed)
                 time.sleep(0.1)
             elif x > x_max:
-                turnright(m_speed=speed)
+                turnright(m_speed=raw_speed)
                 time.sleep(0.1)
-            elif area < minArea:
-                forwards(m_speed=speed)
+            elif speed > 0:
+                forwards(m_speed=raw_speed)
                 time.sleep(0.2)
-            elif area > maxArea:
-                reverse(m_speed=speed)
+            elif speed < 0:
+                raw_speed = max(0, min(100, -speed))
+                reverse(m_speed=raw_speed)
                 time.sleep(0.2)
             else:
                 stopall()
