@@ -1,14 +1,14 @@
-import threading
-
-import netifaces as ni
 import json
-
+import netifaces as ni
+import threading
 import time
+
 from raspberry.motor_controller import QuadMotorController
+from raspberry.pid import PID
 from raspberry.server import Server
 
 t = 0.1
-speed = None
+speed = 0
 
 x = 0
 y = 0
@@ -19,27 +19,36 @@ x_min = 70
 x_max = 200
 maxArea = 800
 minArea = 0
+pid = PID()
 
 
-def reverse(m_speed=None):
+def reverse(m_speed=0):
+    if m_speed == 0:
+        m_speed = None
     motor_controller.move_backward(back_speed=m_speed)
     # setLEDs(1, 0, 0, 1)
     # print('straight')
 
 
-def forwards(m_speed=None):
+def forwards(m_speed=0):
+    if m_speed == 0:
+        m_speed = None
     motor_controller.move_forward(forward_speed=m_speed)
     # setLEDs(0, 1, 1, 0)
     # print('straight')
 
 
-def turnright(m_speed=None):
+def turnright(m_speed=0):
+    if m_speed == 0:
+        m_speed = None
     motor_controller.move_right(right_speed=m_speed)
     # setLEDs(0, 0, 1, 1)
     # print('left')
 
 
-def turnleft(m_speed=None):
+def turnleft(m_speed=0):
+    if m_speed == 0:
+        m_speed = None
     motor_controller.move_left(left_speed=m_speed)
     # setLEDs(1, 1, 0, 0)
     # print('right')
@@ -52,7 +61,7 @@ def stopall():
 
 
 def movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, pid
     print("started")
 
     while True:
@@ -66,6 +75,7 @@ def movement():
             x_max = json_message.get("x_max")
             maxArea = json_message.get("maxArea")
             minArea = json_message.get("minArea")
+            pid.target = (minArea + maxArea) / 2
             print("Got Min and Max")
 
         if "status" in message:
@@ -108,10 +118,11 @@ def movement():
 
 
 def auto_movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, speed, pid
     while True:
-        area = width * height
         if status == 'run':
+            area = width * height
+            speed += pid.update(area)
             if x < x_min:
                 turnleft(m_speed=speed)
                 time.sleep(0.1)
@@ -128,7 +139,6 @@ def auto_movement():
                 stopall()
             stopall()
             time.sleep(0.2)
-
         else:
             time.sleep(1)
 

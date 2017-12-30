@@ -23,7 +23,8 @@ class ObjectTracker(metaclass=ABCMeta):
             camera = cv2.VideoCapture(self.url)
         try:
             while self._track(camera):
-                next_position = self.interpolater.predict(self.positions)
+                pass
+                # next_position = self.interpolater.predict(self.positions)
         finally:
             camera.release()
             cv2.destroyAllWindows()
