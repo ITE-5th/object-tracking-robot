@@ -10,7 +10,7 @@ import qdarkstyle
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QAction, QPushButton, QColorDialog
 
 from controller.client import Client
 from controller.detectors.color_detector import ColorObjectDetector
@@ -42,6 +42,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.tracker = ObjectTracker()
         self.client = Client(host=host, port=port)
         self.timer = QtCore.QTimer(self)
+        self.colorPickerButton.clicked.connect(self.color_picker)
 
         self.setup_camera(url)
 
@@ -129,6 +130,15 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             print(verbose)
             self.client.send(json_data)
             self.client.send(json_data)
+
+    def color_picker(self):
+        a = QColorDialog
+        a.setCurrentColor(self.color_detector.get_default_color())
+        color = QColorDialog.getColor()
+        print(color.getRgb())
+        self.colorPickerButton.setStyleSheet("background-color: %s" %(color.name()))
+        # self.colorPickerButton.setStyle
+        # self.color_detector.set_color(color)
 
     def start_tracking(self):
         self.status = self.RUN
@@ -258,6 +268,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
             new_img, self.bboxes = self.detector.detect_all(img)
 
+            # if no bboxes, display the old image
             if new_img is None:
                 new_img = img
 
