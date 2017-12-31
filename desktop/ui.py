@@ -19,11 +19,6 @@ from controller.trackers.object_tracker import ObjectTracker
 from desktop.image_widget import ImageWidget
 
 FormClass = uic.loadUiType("ui.ui")[0]
-objects = None
-labels = None
-q = Queue()
-capture = None
-
 
 class Ui(QtWidgets.QMainWindow, FormClass):
     RUN = 'run'
@@ -40,6 +35,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.yolo_detector = YoloObjectDetector()
         self.color_detector = ColorObjectDetector()
         self.bboxes = None
+        self.queue = Queue()
 
         self.detector = self.yolo_detector
         self.tracker = ObjectTracker()
@@ -81,11 +77,11 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.capture.set(cv2.CAP_PROP_FPS, fps)
 
-    def grab(self, q):
+    def grab(self):
         while self.running:
             self.capture.grab()
             _, img = self.capture.retrieve(0)
-            q.put(img)
+            self.queue.put(img)
 
     def keyPressEvent(self, event1):
         self.status = self.MANUAL
@@ -236,18 +232,16 @@ class Ui(QtWidgets.QMainWindow, FormClass):
     def resume_camera(self):
         # 1920, 1080, 30
         self.videoWidget.setBBoxes(None)
-        global q
-        capture_thread = threading.Thread(target=self.grab, args=[q])
+        capture_thread = threading.Thread(target=self.grab)
         capture_thread.start()
 
     def capture_image(self):
-        global q
         self.set_image_on_button(self.captureButton, not self.running)
         if self.running:
             self.running = False
         else:
             self.running = True
-            q.queue.clear()
+            self.queue.queue.clear()
             self.resume_camera()
 
     def set_image(self, image_path):
@@ -256,9 +250,9 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.imageLabel.setPixmap(scaled_pixmap)
 
     def update_frame(self):
-        if not q.empty() and self.running:
+        if not self.queue.empty() and self.running:
             self.videoWidget.setBBoxes(None)
-            img = q.get()
+            img = self.queue.get()
 
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
             # if self.detector == self.yolo_detector:
