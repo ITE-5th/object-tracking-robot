@@ -1,12 +1,12 @@
 import json
 import sys
 import threading
+import time
 from queue import Queue
 
 import cv2
 # from PySide import QtGui
 import qdarkstyle
-import time
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QIcon
@@ -28,18 +28,6 @@ q = Queue()
 capture = None
 
 
-def setup_camera(url=None, width=1920, height=1080, fps=5):
-    global capture
-    if url is None:
-        capture = cv2.VideoCapture(0)
-    else:
-        capture = cv2.VideoCapture(url)
-
-    capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    capture.set(cv2.CAP_PROP_FPS, fps)
-
-
 def grab(q):
     global running
     global capture
@@ -58,6 +46,9 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
 
+        self.capture = None
+        self.setup_camera(url)
+
         self.trackButton.clicked.connect(self.start_tracking)
         self.forceStopButton.clicked.connect(self.stop_tracking)
         self.setButton.clicked.connect(self.robot_initializer)
@@ -72,7 +63,6 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.videoWidget.mousePressEvent = self.select_object
 
         self.set_image_on_button(self.captureButton, True)
-        setup_camera(url)
 
         self.resume_camera()
         self.timer = QtCore.QTimer(self)
@@ -91,6 +81,16 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
         self.client = Client(host=host, port=port)
         self.status = self.STOP
+
+    def setup_camera(self, url=None, width=1920, height=1080, fps=5):
+        if url is None:
+            self.capture = cv2.VideoCapture(0)
+        else:
+            self.capture = cv2.VideoCapture(url)
+
+        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.capture.set(cv2.CAP_PROP_FPS, fps)
 
     def keyPressEvent(self, event1):
         self.status = self.MANUAL
@@ -195,13 +195,13 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         verbose = {}
         while self.tracker.is_working and self.status != self.STOP:
             if self.tracker.has_positions():
-                currentPosition = self.tracker.first_position()
-                if currentPosition[0] is not None:
-                    print(currentPosition)
-                    verbose["x"] = currentPosition[0]
-                    verbose["y"] = currentPosition[1]
-                    verbose["width"] = currentPosition[2]
-                    verbose["height"] = currentPosition[3]
+                current_position = self.tracker.first_position()
+                if current_position[0] is not None:
+                    print(current_position)
+                    verbose["x"] = current_position[0]
+                    verbose["y"] = current_position[1]
+                    verbose["width"] = current_position[2]
+                    verbose["height"] = current_position[3]
                     json_data = json.dumps(verbose)
                     self.client.send(json_data)
             time.sleep(0.2)

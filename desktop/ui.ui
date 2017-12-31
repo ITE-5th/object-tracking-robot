@@ -92,7 +92,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Distance:</string>
+     <string>Parameters:</string>
     </property>
     <widget class="QLineEdit" name="minXEdit">
      <property name="geometry">
@@ -107,7 +107,7 @@
       <string>1</string>
      </property>
      <property name="placeholderText">
-      <string>Min X</string>
+      <string>Minimum X</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="maxXEdit">
@@ -123,7 +123,7 @@
       <string>2</string>
      </property>
      <property name="placeholderText">
-      <string>Max X</string>
+      <string>Maximum X</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="minAreaEdit">
@@ -139,7 +139,7 @@
       <string>1</string>
      </property>
      <property name="placeholderText">
-      <string>Min Radius</string>
+      <string>Minimum Area</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="maxAreaEdit">
@@ -155,7 +155,7 @@
       <string>2</string>
      </property>
      <property name="placeholderText">
-      <string>Max Radius</string>
+      <string>Maximum Area</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
@@ -263,6 +263,9 @@
        <width>155</width>
        <height>29</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Start Tracking</string>

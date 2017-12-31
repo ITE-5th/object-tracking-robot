@@ -26,10 +26,14 @@ class ObjectTracker(metaclass=ABCMeta):
             camera = cv2.VideoCapture(self.url)
         try:
             while True:
-                result = self.detector.detect()
+                x, y, width, height, name = self.detector.detect()
                 self.positions.appendleft((x, y, width, height, name))
 
-                next_position = self.predict_next_position()
+                # to stop tracking
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord("q"):
+                    break
+                # next_position = self.predict_next_position()
         finally:
             camera.release()
             cv2.destroyAllWindows()
