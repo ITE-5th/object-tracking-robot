@@ -1,9 +1,9 @@
 import json
-import netifaces as ni
 import threading
 import time
 
 import RPi.GPIO as GPIO
+import netifaces as ni
 from motor_controller import QuadMotorController
 from pid import PID
 from range_sensor import RangeSensor
@@ -21,19 +21,32 @@ x_min = 70
 x_max = 200
 maxArea = 800
 minArea = 0
-pid = PID()
-range_sensor = RangeSensor()
+pid = PID(p=1, i=0.5, d=0.01)
 motor_controller = QuadMotorController()
 
 range_sensor_value = 0
+
+no_object = "no_object"
+run = "run"
 
 
 def range_sensor_updater():
     global range_sensor_value
     print('range Sensor thread is running')
 
+    is_init = False
     while True:
-        range_sensor_value = range_sensor.update()
+        try:
+            if not is_init:
+                range_sensor = RangeSensor()
+                is_init = True
+            update = range_sensor.update()
+            range_sensor_value = update
+            print('range : {}'.format(range_sensor_value))
+        except Exception as e:
+            print('range Sensor thread is stopped')
+            print(e)
+            is_init = False
 
 
 def reverse(m_speed=0):
@@ -106,6 +119,10 @@ def movement():
             width = json_message.get("width")
             height = json_message.get("height")
             print("x = {}, y = {}, width = {}, height = {}".format(x, y, width, height))
+            if x == 0 and y == 0 and width == 0 and height == 0:
+                status = no_object
+            elif status == no_object:
+                status = run
 
         FB = json_message.get("FB")
 
@@ -132,35 +149,59 @@ def movement():
             stopall()
 
 
+# Helper Function
+def percentage(part, whole):
+    return 100 * float(part) / float(whole)
+
+
 def auto_movement():
     global status, width, height, x_min, x_max, maxArea, minArea, x, y, speed, pid
+    last_turn = 'L'
+    no_object_loops = 0
     while True:
-        if status == 'run':
+        if status == run:
+            no_object_loops = 0
+            raw_speed = 100
             area = width * height
-            speed += pid.update(area)
-            raw_speed = max(0, min(100, speed))
-            print('******************************')
-            print('speed is :{}'.format(speed))
-            print('raw speed is : {}'.format(raw_speed))
-            print('******************************')
-            speed = max(0, min(100, speed))
+            # speed += pid.update(area)
+            # raw_speed = max(0, min(100, speed))
+            # print('******************************')
+            # print('speed is :{}'.format(speed))
+            # print('raw speed is : {}'.format(raw_speed))
+            # print('******************************')
+            # speed = max(0, min(100, speed))
             if x < x_min:
                 turnleft(m_speed=raw_speed)
-                time.sleep(0.1)
+                time.sleep(0.05)
+                x += 75
+                last_turn = 'L'
             elif x > x_max:
                 turnright(m_speed=raw_speed)
+                time.sleep(0.05)
+                x -= 75
+                last_turn = 'R'
+            elif area < minArea:
+                forwards(m_speed=speed)
+                area += 300
                 time.sleep(0.1)
-            elif speed > 0:
-                forwards(m_speed=raw_speed)
-                time.sleep(0.2)
-            elif speed < 0:
-                raw_speed = max(0, min(100, -speed))
-                reverse(m_speed=raw_speed)
-                time.sleep(0.2)
+            elif area > maxArea:
+                reverse(m_speed=speed)
+                area -= 300
+                time.sleep(0.1)
             else:
                 stopall()
             stopall()
             time.sleep(0.2)
+        elif status == no_object:
+            if no_object_loops < 15:
+                no_object_loops += 1
+                if last_turn == 'R':
+                    turnright()
+                else:
+                    turnleft()
+                time.sleep(0.1)
+                stopall()
+                time.sleep(0.5)
         else:
             time.sleep(1)
 
@@ -168,7 +209,9 @@ def auto_movement():
 if __name__ == '__main__':
     ip = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
     server = Server(host=ip)
-
+    # netsh wlan set hostednetwork mode=allow ssid=zaher key=12345678
+    # netsh wlan start hostednetwork
+    #
     print('Server is online \nHost Name : {}:{}'.format(server.host_name, server.port))
     try:
         range_sensor_thread = threading.Thread(target=range_sensor_updater)

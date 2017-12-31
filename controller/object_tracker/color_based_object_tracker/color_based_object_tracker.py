@@ -39,38 +39,41 @@ class ColorBasedObjectTracker(ObjectTracker):
         cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
         if len(cnts) < 1:
-            return True
-        c = max(cnts, key=cv2.contourArea)
-        ((x, y), radius) = cv2.minEnclosingCircle(c)
-        M = cv2.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            if len(self.positions) == 0 or self.positions[0][4] != ObjectTracker.NO_OBJECT:
+                print(ObjectTracker.NO_OBJECT)
+                self.positions.appendleft((0, 0, 0, 0, ObjectTracker.NO_OBJECT))
+        else:
+            c = max(cnts, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            M = cv2.moments(c)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
-        # only proceed if the radius meets a minimum size
-        if radius > 10:
-            values = "x ={} ,y = {}, r = {} ".format(int(x), int(y), round(radius, 2))
-            cv2.putText(frame, values, (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1000)
+            # only proceed if the radius meets a minimum size
+            if radius > 15:
+                values = "x ={} ,y = {}, r = {} ".format(int(x), int(y), round(radius, 2))
+                cv2.putText(frame, values, (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1000)
 
-            # draw the circle and centroid on the frame,
-            # then update the list of tracked points
+                # draw the circle and centroid on the frame,
+                # then update the list of tracked points
 
-            cv2.circle(frame, (int(x), int(y)), int(radius),
-                       (0, 255, 255), 2)
-            cv2.circle(frame, center, 5, (0, 0, 255), -1)
+                cv2.circle(frame, (int(x), int(y)), int(radius),
+                           (0, 255, 255), 2)
+                cv2.circle(frame, center, 5, (0, 0, 255), -1)
+                # update the points queue
+                self.positions.appendleft((center[0], center[1], radius, radius, "colored thing"))
 
-        # update the points queue
-        self.positions.appendleft((center[0], center[1], radius, radius, "colored thing"))
+            # loop over the set of tracked points
+            for i in range(1, len(self.positions)):
+                # if either of the tracked points are None, ignore
+                # them
+                if self.positions[i - 1] is None or self.positions[i] is None:
+                    continue
 
-        # loop over the set of tracked points
-        for i in range(1, len(self.positions)):
-            # if either of the tracked points are None, ignore
-            # them
-            if self.positions[i - 1] is None or self.positions[i] is None:
-                continue
-
-            # otherwise, compqute the thickness of the line and
-            # draw the connecting lines
-            thickness = int(np.sqrt(self.buffer_size / float(i + 1)) * 2.5)
-            cv2.line(frame, (self.positions[i - 1][0], self.positions[i - 1][1]), (self.positions[i][0], self.positions[i][1]), (0, 0, 255), thickness)
+                # otherwise, compqute the thickness of the line and
+                # draw the connecting lines
+                thickness = int(np.sqrt(self.buffer_size / float(i + 1)) * 2.5)
+                cv2.line(frame, (self.positions[i - 1][0], self.positions[i - 1][1]),
+                         (self.positions[i][0], self.positions[i][1]), (0, 0, 255), thickness)
 
         # show the frame to our screen
         cv2.imshow("Frame", frame)

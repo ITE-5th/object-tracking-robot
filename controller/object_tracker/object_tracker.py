@@ -7,6 +7,8 @@ from controller.object_tracker.position_predictor.velocity_position_predictor im
 
 
 class ObjectTracker(metaclass=ABCMeta):
+    NO_OBJECT = "No_Object"
+
     def __init__(self, video_url=0, buffer_size=64, time_step=2, interpolater=VelocityPositionPredictor(4)):
         self.url = video_url
         self.buffer_size = buffer_size
@@ -29,7 +31,6 @@ class ObjectTracker(metaclass=ABCMeta):
             camera.release()
             cv2.destroyAllWindows()
             self.is_working = False
-
 
     @abstractmethod
     def _track(self, camera) -> bool:

@@ -6,15 +6,23 @@ import time
 from PyQt5 import QtCore, QtWidgets
 
 from controller.client import Client
+from controller.detectors.yolo.yolo_object_tracker import YoloObjectTracker
 from controller.form import Ui_Dialog
-# from controller.object_tracker.yolo_object_tracker.yolo_object_tracker import YoloObjectTracker
 from controller.object_tracker.color_based_object_tracker.color_based_object_tracker import ColorBasedObjectTracker
+from controller.object_tracker.object_tracker import ObjectTracker
+
+
+def max_diff(current_position, prev_position):
+    max_var = max(abs(current_position[0] - prev_position[0]), abs(current_position[1] - prev_position[1]),
+                  abs(current_position[2] - prev_position[2]), abs(current_position[3] - prev_position[3]))
+    return max_var
 
 
 class MainWindow(QtWidgets.QMainWindow):
     RUN = 'run'
     STOP = 'stop'
     MANUAL = 'manual'
+    NO_OBJECT = ObjectTracker.NO_OBJECT
 
     def __init__(self, host='raspberrypi', port=1234, url=None):
         super().__init__()
@@ -30,8 +38,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
         self.client = Client(host=host, port=port)
 
-        self.object_tracker = ColorBasedObjectTracker(video_url=url, buffer_size=64)
-        # self.object_tracker = YoloObjectTracker(video_url=url, buffer_size=64)
+        # self.object_tracker = ColorBasedObjectTracker(video_url=url, buffer_size=64)
+        self.object_tracker = YoloObjectTracker(video_url=url, buffer_size=64)
         self.status = self.STOP
 
     def keyPressEvent(self, event1):
@@ -150,10 +158,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def data_sender(self):
         verbose = {}
+
+        prev_position = [0, 0, 0, 0]
         while self.object_tracker.is_working and self.status != self.STOP:
             if len(self.object_tracker.positions) > 0:
                 currentPosition = self.object_tracker.positions[0]
-                if currentPosition[0] is not None:
+                if currentPosition[0] is not None and self.status != self.NO_OBJECT and max_diff(currentPosition,
+                                                                                                 prev_position) > 10:
                     print(currentPosition)
                     verbose["x"] = currentPosition[0]
                     verbose["y"] = currentPosition[1]
@@ -161,8 +172,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     verbose["height"] = currentPosition[3]
                     json_data = json.dumps(verbose)
                     self.client.send(json_data)
+                    prev_position = currentPosition
+                if currentPosition[4] == self.NO_OBJECT:
+                    self.set_status(self.NO_OBJECT)
+                elif self.status == self.NO_OBJECT:
+                    self.set_status(self.RUN)
             time.sleep(0.2)
-        self.status = self.STOP
+        self.set_status(self.STOP)
+
+    def set_status(self, status):
+        self.status = status
         self.ui.label_2.setText(self.status)
 
 
@@ -177,5 +196,6 @@ if __name__ == '__main__':
     # videoURL = "./testData/ball_tracking_example.mp4"
     videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
     IP = "raspberrypi"
+    # IP = "localhost"
     PORT = 1234
     main(IP, PORT, videoURL)

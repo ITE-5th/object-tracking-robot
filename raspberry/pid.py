@@ -1,3 +1,6 @@
+import time
+
+
 class PID:
 
     def __init__(self, target=None, p=2.0, i=0.0, d=1.0, derivator=0, integrator=0, integrator_max=500,
@@ -29,12 +32,20 @@ class PID:
         return self.p + self.i + self.d
 
 
+def percentage(part, whole):
+    return 100 * float(part) / float(whole)
+
+
 if __name__ == '__main__':
+    target_area = 3000
+    current_area = 200
     # example
-    pid = PID(2)
-    y = 0
-    x = 0
+    pid = PID(target=target_area, p=0.8, i=0.9, d=0.06)
     while True:
-        x += pid.update(y)
-        y += 1
-        print(x)
+        update = pid.update(current_area)
+        current_area += update
+        # New Speed
+
+        print(percentage(update, pid.target).clamp(min=0, max=100))
+        # print(x)
+        time.sleep(0.1)
