@@ -10,7 +10,7 @@ import qdarkstyle
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtWidgets import QLabel, QAction, QPushButton, QColorDialog
+from PyQt5.QtWidgets import QLabel, QColorDialog
 
 from controller.client import Client
 from controller.detectors.color_detector import ColorObjectDetector
@@ -38,8 +38,8 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.bboxes = None
         self.queue = Queue()
 
-        self.detector = self.yolo_detector
         self.tracker = ObjectTracker()
+        self.tracker.set_detector(self.yolo_detector)
         self.client = Client(host=host, port=port)
         self.timer = QtCore.QTimer(self)
         self.colorPickerButton.clicked.connect(self.color_picker)
@@ -136,25 +136,28 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         a.setCurrentColor(self.color_detector.get_default_color())
         color = QColorDialog.getColor()
         print(color.getRgb())
-        self.colorPickerButton.setStyleSheet("background-color: %s" %(color.name()))
+        self.colorPickerButton.setStyleSheet("background-color: %s" % (color.name()))
         # self.colorPickerButton.setStyle
         # self.color_detector.set_color(color)
 
     def start_tracking(self):
         self.status = self.RUN
-        if self.tracker.is_working:
-            print('start tracking')
-            verbose = {
-                "status": self.RUN
-            }
-            json_data = json.dumps(verbose)
-            self.client.send(json_data)
+        # if self.tracker.is_tracking():
+        self.tracker.set_tracking(True)
+        print('start tracking')
+        verbose = {
+            "status": self.RUN
+        }
+        json_data = json.dumps(verbose)
+        self.client.send(json_data)
 
-            self.statusLabel.setText(self.status)
-            data_sender_thread = threading.Thread(target=self.data_sender)
-            data_sender_thread.start()
+        self.statusLabel.setText(self.status)
+        data_sender_thread = threading.Thread(target=self.data_sender)
+        data_sender_thread.start()
 
     def stop_tracking(self):
+
+        self.tracker.set_tracking(False)
         self.status = self.STOP
         verbose = {
             "status": self.STOP
@@ -195,7 +198,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def data_sender(self):
         verbose = {}
-        while self.tracker.is_working and self.status != self.STOP:
+        while self.tracker.is_tracking() and self.status != self.STOP:
             if self.tracker.has_positions():
                 current_position = self.tracker.first_position()
                 if current_position[0] is not None:
@@ -211,19 +214,18 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.statusLabel.setText(self.status)
 
     def set_yolo_detector(self):
-        self.detector = self.yolo_detector
-
+        self.tracker.set_detector(self.yolo_detector)
         self.videoWidget.setBBoxes(self.bboxes)
 
     def set_color_detector(self):
-        self.detector = self.color_detector
+        self.tracker.set_detector(self.color_detector)
         self.videoWidget.setBBoxes(None)
 
     def item_selected(self, item):
-        self.detector.set_classes([item])
+        self.tracker.detector.set_classes([item])
 
     def select_object(self, event):
-        if self.running or self.detector is not self.yolo_detector:
+        if self.running or self.tracker.detector is not self.yolo_detector:
             return
 
         self.videoWidget.setBBoxes(self.bboxes)
@@ -266,11 +268,13 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             img = self.queue.get()
 
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
-            new_img, self.bboxes = self.detector.detect_all(img)
 
-            # if no bboxes, display the old image
-            if new_img is None:
-                new_img = img
+            # if self.tracker.is_tracking():
+            #     new_img = self.tracker.track(img)
+            # else:
+            #     new_img, self.bboxes = self.tracker.detector.detect_all(img)
+
+            new_img, self.bboxes = self.tracker.track(img)
 
             height, width, bpc = new_img.shape
             new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
@@ -302,7 +306,8 @@ def main(ip, port, url=None):
 
 if __name__ == '__main__':
     # videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
-    IP = "raspberrypi"
+    # IP = "raspberrypi"
+    IP = "localhost"
     PORT = 1234
 
     main(ip=IP, port=PORT, url=None)

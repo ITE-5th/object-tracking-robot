@@ -23,13 +23,13 @@ class YoloObjectDetector(ObjectDetector):
 
     def _detect(self, image):
 
-        bboxes, draw_img = self._detect_all(image)
+        draw_img, bboxes = self._detect_all(image)
         bboxes = [box for box in bboxes if
-                  self.selected_classes and self.class_names[
-                      box[6] % len(self.class_names)] in self.selected_classes and box[5] >= self.threshold]
+                  self.selected_classes and
+                  box[5] in self.selected_classes and box[4] >= self.threshold]
 
         if len(bboxes) < 1:
-            return 0, 0, 0, 0, self.NO_OBJECT
+            return image, [0, 0, 0, 0, self.NO_OBJECT]
 
         box = sorted(bboxes, key=lambda x: x[5])[0]
 
@@ -37,7 +37,7 @@ class YoloObjectDetector(ObjectDetector):
         x1, y1, x2, y2, prop, name = box
         x, y, width, height = (x1 + x2) // 2, (y1 + y2) // 2, abs(x2 - x1) // 2, abs(y2 - y1) // 2
 
-        return x, y, width, height, box[6]
+        return draw_img, [x, y, width, height, box[5]]
 
     def _detect_all(self, image):
         width, height = image.shape[1], image.shape[0]

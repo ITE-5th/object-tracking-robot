@@ -1,8 +1,6 @@
 from abc import ABCMeta
 from collections import deque
 
-import cv2
-
 from controller.detectors.detector import ObjectDetector
 
 
@@ -12,32 +10,20 @@ class ObjectTracker(metaclass=ABCMeta):
         self.buffer_size = buffer_size
         self.time_step = time_step
         self.positions = deque(maxlen=self.buffer_size)
-        self.is_working = False
+        self.tracking = False
         self.intercepts = []
         self.detector = None
         for i in range(interpolation_length - 1):
             self.intercepts.append(1 / (2 ** i))
 
-    def track(self):
-        self.is_working = True
-        if self.url is None:
-            camera = cv2.VideoCapture(0)
-        else:
-            camera = cv2.VideoCapture(self.url)
-        try:
-            while True:
-                x, y, width, height, name = self.detector.detect()
-                self.positions.appendleft((x, y, width, height, name))
+    def track(self, img):
 
-                # to stop tracking
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord("q"):
-                    break
-                # next_position = self.predict_next_position()
-        finally:
-            camera.release()
-            cv2.destroyAllWindows()
-            self.is_working = False
+        if self.is_tracking():
+            img, [x, y, width, height, name] = self.detector.detect(img)
+            self.positions.appendleft((x, y, width, height, name))
+            return img, None
+        else:
+            return self.detector.detect_all(img)
 
     def predict_next_position(self):
         if len(self.positions) < len(self.intercepts):
@@ -61,3 +47,9 @@ class ObjectTracker(metaclass=ABCMeta):
 
     def first_position(self):
         return self.positions[0]
+
+    def is_tracking(self):
+        return self.tracking
+
+    def set_tracking(self, tracking):
+        self.tracking = tracking
