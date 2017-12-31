@@ -1,7 +1,8 @@
 import sys
 import threading
 from queue import Queue
-
+# from PySide import QtGui
+import qdarkstyle
 import cv2
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QSize
@@ -150,6 +151,8 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     # with open("qdarkstyle/style.qss") as f:
     #     app.setStyleSheet(f.read())
+
+    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     ui = Ui()
     ui.show()
     app.exec_()
