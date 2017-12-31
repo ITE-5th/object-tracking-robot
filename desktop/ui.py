@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QLabel, QColorDialog
 
 from controller.client import Client
 from controller.detectors.color_detector import ColorObjectDetector
+from controller.detectors.detector import ObjectDetector
 from controller.detectors.yolo_detector import YoloObjectDetector
 from controller.trackers.object_tracker import ObjectTracker
 from desktop.image_widget import ImageWidget
@@ -25,6 +26,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
     RUN = 'run'
     STOP = 'stop'
     MANUAL = 'manual'
+    NO_OBJECT = ObjectDetector.NO_OBJECT
 
     def __init__(self, host='raspberrypi', port=1234, url=None):
         QtWidgets.QMainWindow.__init__(self)
@@ -202,19 +204,30 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def data_sender(self):
         verbose = {}
+
+        prev_position = [0, 0, 0, 0]
         while self.tracker.is_tracking() and self.status != self.STOP:
             if self.tracker.has_positions():
-                current_position = self.tracker.first_position()
-                if current_position[0] is not None:
-                    print(current_position)
-                    verbose["x"] = current_position[0]
-                    verbose["y"] = current_position[1]
-                    verbose["width"] = current_position[2]
-                    verbose["height"] = current_position[3]
+                currentPosition = self.tracker.positions[0]
+                if currentPosition[0] is not None and self.status != self.NO_OBJECT and max_diff(currentPosition,
+                                                                                                 prev_position) > 10:
+                    print(currentPosition)
+                    verbose["x"] = currentPosition[0]
+                    verbose["y"] = currentPosition[1]
+                    verbose["width"] = currentPosition[2]
+                    verbose["height"] = currentPosition[3]
                     json_data = json.dumps(verbose)
                     self.client.send(json_data)
+                    prev_position = currentPosition
+                if currentPosition[4] == self.NO_OBJECT:
+                    self.set_status(self.NO_OBJECT)
+                elif self.status == self.NO_OBJECT:
+                    self.set_status(self.RUN)
             time.sleep(0.2)
-        self.status = self.STOP
+        self.set_status(self.STOP)
+
+    def set_status(self, status):
+        self.status = status
         self.statusLabel.setText(self.status)
 
     def set_yolo_detector(self):
@@ -299,6 +312,14 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         QtCore.QCoreApplication.instance().quit()
 
 
+# Helper function
+
+def max_diff(current_position, prev_position):
+    max_var = max(abs(current_position[0] - prev_position[0]), abs(current_position[1] - prev_position[1]),
+                  abs(current_position[2] - prev_position[2]), abs(current_position[3] - prev_position[3]))
+    return max_var
+
+
 def main(ip, port, url=None):
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
@@ -309,9 +330,9 @@ def main(ip, port, url=None):
 
 
 if __name__ == '__main__':
-    # videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
-    # IP = "raspberrypi"
-    IP = "localhost"
+    videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
+    IP = "raspberrypi"
+    # IP = "localhost"
     PORT = 1234
 
-    main(ip=IP, port=PORT, url=None)
+    main(ip=IP, port=PORT, url=videoURL)
