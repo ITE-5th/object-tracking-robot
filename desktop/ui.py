@@ -20,6 +20,7 @@ from desktop.image_widget import ImageWidget
 
 FormClass = uic.loadUiType("ui.ui")[0]
 
+
 class Ui(QtWidgets.QMainWindow, FormClass):
     RUN = 'run'
     STOP = 'stop'
@@ -255,10 +256,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             img = self.queue.get()
 
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
-            # if self.detector == self.yolo_detector:
-
-            img, self.bboxes = self.detector.detect_all(img, self.window_width, self.window_height)
-            # else:
+            img, self.bboxes = self.detector.detect_all(img)
 
             height, width, bpc = img.shape
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

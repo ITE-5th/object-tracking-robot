@@ -21,9 +21,9 @@ class YoloObjectDetector(ObjectDetector):
         self.selected_classes = selected_classes
         self.threshold = threshold
 
-    def _detect(self, image, window_width, window_height):
+    def _detect(self, image):
 
-        bboxes, draw_img = self._detect_all(image, window_width, window_height)
+        bboxes, draw_img = self._detect_all(image)
         bboxes = [box for box in bboxes if
                   self.selected_classes and self.class_names[
                       box[6] % len(self.class_names)] in self.selected_classes and box[5] >= self.threshold]
@@ -35,7 +35,7 @@ class YoloObjectDetector(ObjectDetector):
 
         return x, y, width, height, box[6]
 
-    def _detect_all(self, image, window_width, window_height):
+    def _detect_all(self, image):
         width, height = image.shape[1], image.shape[0]
         sized = cv2.resize(image, (self.model.width, self.model.height))
         bboxes = do_detect(self.model, sized, 0.5, 0.4, 1)

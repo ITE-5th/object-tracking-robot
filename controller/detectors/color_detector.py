@@ -5,7 +5,7 @@ from controller.detectors.detector import ObjectDetector
 
 class ColorObjectDetector(ObjectDetector):
 
-    def _detect_all(self, image, window_width, window_height):
+    def _detect_all(self, image):
         frame = image
 
         # resize the frame, blur it, and convert it to the HSV
@@ -43,5 +43,5 @@ class ColorObjectDetector(ObjectDetector):
         self.color_lower = color_lower
         self.color_upper = color_upper
 
-    def _detect(self, image, window_width, window_height):
-        return self._detect_all(image, window_width, window_height)[1]
+    def _detect(self, image):
+        return self._detect_all(image)[1]
