@@ -9,7 +9,7 @@ import cv2
 import qdarkstyle
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtGui import QPixmap, QIcon, QColor
 from PyQt5.QtWidgets import QLabel, QColorDialog
 
 from controller.client import Client
@@ -45,9 +45,15 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.tracker.set_detector(self.yolo_detector)
         self.client = Client(host=host, port=port)
         self.timer = QtCore.QTimer(self)
-        self.colorPickerButton.clicked.connect(self.color_picker)
+        self.lowerBoundColor.clicked.connect(self.set_lower_color)
+        self.upperBoundColor.clicked.connect(self.set_upper_color)
 
         self.setup_camera(url)
+
+        color = QColor(*self.color_detector.get_lower_color())
+        self.lowerBoundColor.setStyleSheet("background-color: %s" % (color.name()))
+        color = QColor(*self.color_detector.get_upper_color())
+        self.upperBoundColor.setStyleSheet("background-color: %s" % (color.name()))
 
         self.trackButton.clicked.connect(self.start_tracking)
         self.forceStopButton.clicked.connect(self.stop_tracking)
@@ -133,14 +139,23 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             self.client.send(json_data)
             self.client.send(json_data)
 
-    def color_picker(self):
-        a = QColorDialog
-        a.setCurrentColor(self.color_detector.get_default_color())
-        color = QColorDialog.getColor()
-        print(color.getRgb())
-        self.colorPickerButton.setStyleSheet("background-color: %s" % (color.name()))
-        # self.colorPickerButton.setStyle
-        # self.color_detector.set_color(color)
+    def set_lower_color(self):
+        if self.tracker.detector is not self.color_detector:
+            return
+
+        dialog = QColorDialog()
+        color = dialog.getColor(QColor(*self.tracker.detector.get_lower_color()))
+        self.lowerBoundColor.setStyleSheet("background-color: %s" % (color.name()))
+        self.tracker.detector.set_lower_color(color.getRgb())
+
+    def set_upper_color(self):
+        if self.tracker.detector is not self.color_detector:
+            return
+
+        dialog = QColorDialog()
+        color = dialog.getColor(QColor(*self.tracker.detector.get_upper_color()))
+        self.upperBoundColor.setStyleSheet("background-color: %s" % (color.name()))
+        self.tracker.detector.set_upper_color(color.getRgb())
 
     def start_tracking(self):
         self.set_status(self.RUN)
