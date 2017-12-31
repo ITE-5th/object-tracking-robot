@@ -32,6 +32,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
         self.running = True
         self.capture = None
+        self.selected_classes = None
         self.status = self.STOP
         self.yolo_detector = YoloObjectDetector()
         self.color_detector = ColorObjectDetector()
@@ -144,6 +145,8 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.status = self.RUN
         # if self.tracker.is_tracking():
         self.tracker.set_tracking(True)
+        self.tracker.detector.set_classes(self.selected_classes)
+
         print('start tracking')
         verbose = {
             "status": self.RUN
@@ -157,6 +160,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def stop_tracking(self):
 
+        self.tracker.detector.set_classes(None)
         self.tracker.set_tracking(False)
         self.status = self.STOP
         verbose = {
@@ -222,7 +226,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.videoWidget.setBBoxes(None)
 
     def item_selected(self, item):
-        self.tracker.detector.set_classes([item])
+        self.selected_classes = [item]
 
     def select_object(self, event):
         if self.running or self.tracker.detector is not self.yolo_detector:

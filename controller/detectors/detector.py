@@ -17,3 +17,7 @@ class ObjectDetector(metaclass=ABCMeta):
 
     def detect_all(self, image):
         return self._detect_all(image)
+
+    @abstractmethod
+    def set_classes(self, classes):
+        raise NotImplementedError()

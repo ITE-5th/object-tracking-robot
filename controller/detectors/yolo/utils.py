@@ -1,4 +1,3 @@
-import os
 import imghdr  # get_image_size
 import math
 import os
@@ -203,7 +202,7 @@ def get_region_boxes(output, conf_thresh, num_classes, anchors, num_anchors, onl
     return all_boxes
 
 
-def plot_boxes_cv2(img, boxes, savename=None, class_names=None, color=None):
+def plot_boxes_cv2(img, boxes, savename=None, class_names=None, color=None, selected_classes=None):
     import cv2
     colors = torch.FloatTensor([[1, 0, 1], [0, 0, 1], [0, 1, 1], [0, 1, 0], [1, 1, 0], [1, 0, 0]]);
 
@@ -220,6 +219,10 @@ def plot_boxes_cv2(img, boxes, savename=None, class_names=None, color=None):
     result = []
     for i in range(len(boxes)):
         box = boxes[i]
+
+        if selected_classes is not None and not class_names[box[6]] in selected_classes:
+            continue
+
         x1 = int(round((box[0] - box[2] / 2.0) * width))
         y1 = int(round((box[1] - box[3] / 2.0) * height))
         x2 = int(round((box[0] + box[2] / 2.0) * width))

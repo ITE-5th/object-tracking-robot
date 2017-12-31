@@ -44,7 +44,7 @@ class YoloObjectDetector(ObjectDetector):
         sized = cv2.resize(image, (self.model.width, self.model.height))
         bboxes = do_detect(self.model, sized, 0.5, 0.4, 1)
         img = cv2.resize(sized, (width, height), interpolation=cv2.INTER_CUBIC)
-        draw_img, bboxes = plot_boxes_cv2(img, bboxes, None, self.class_names)
+        draw_img, bboxes = plot_boxes_cv2(img, bboxes, None, self.class_names, None, self.selected_classes)
 
         return draw_img, bboxes
 
