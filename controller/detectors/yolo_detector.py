@@ -36,9 +36,10 @@ class YoloObjectDetector(ObjectDetector):
         return x, y, width, height, box[6]
 
     def _detect_all(self, image, window_width, window_height):
+        width, height = image.shape[1], image.shape[0]
         sized = cv2.resize(image, (self.model.width, self.model.height))
         bboxes = do_detect(self.model, sized, 0.5, 0.4, 1)
-        img = cv2.resize(sized, (window_width, window_height), interpolation=cv2.INTER_CUBIC)
+        img = cv2.resize(sized, (width, height), interpolation=cv2.INTER_CUBIC)
         draw_img, bboxes = plot_boxes_cv2(img, bboxes, None, self.class_names)
 
         return draw_img, bboxes

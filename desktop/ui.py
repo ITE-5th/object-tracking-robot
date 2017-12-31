@@ -19,22 +19,10 @@ from controller.trackers.object_tracker import ObjectTracker
 from desktop.image_widget import ImageWidget
 
 FormClass = uic.loadUiType("ui.ui")[0]
-running = True
-image = None
-bboxes = None
 objects = None
 labels = None
 q = Queue()
 capture = None
-
-
-def grab(q):
-    global running
-    global capture
-    while running:
-        capture.grab()
-        _, img = capture.retrieve(0)
-        q.put(img)
 
 
 class Ui(QtWidgets.QMainWindow, FormClass):
@@ -46,7 +34,18 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
 
+        self.running = True
         self.capture = None
+        self.status = self.STOP
+        self.yolo_detector = YoloObjectDetector()
+        self.color_detector = ColorObjectDetector()
+        self.bboxes = None
+
+        self.detector = self.yolo_detector
+        self.tracker = ObjectTracker()
+        self.client = Client(host=host, port=port)
+        self.timer = QtCore.QTimer(self)
+
         self.setup_camera(url)
 
         self.trackButton.clicked.connect(self.start_tracking)
@@ -65,22 +64,12 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.set_image_on_button(self.captureButton, True)
 
         self.resume_camera()
-        self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
-
-        self.yolo_detector = YoloObjectDetector()
-        self.color_detector = ColorObjectDetector()
-
-        self.detector = self.yolo_detector
-        self.tracker = ObjectTracker()
 
         self.statusBar.addWidget(QLabel("Status: "))
         self.statusLabel = QLabel("Initialization")
         self.statusBar.addWidget(self.statusLabel)
-
-        self.client = Client(host=host, port=port)
-        self.status = self.STOP
 
     def setup_camera(self, url=None, width=1920, height=1080, fps=5):
         if url is None:
@@ -91,6 +80,12 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.capture.set(cv2.CAP_PROP_FPS, fps)
+
+    def grab(self, q):
+        while self.running:
+            self.capture.grab()
+            _, img = self.capture.retrieve(0)
+            q.put(img)
 
     def keyPressEvent(self, event1):
         self.status = self.MANUAL
@@ -211,8 +206,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
     def set_yolo_detector(self):
         self.detector = self.yolo_detector
 
-        global bboxes
-        self.videoWidget.setBBoxes(bboxes)
+        self.videoWidget.setBBoxes(self.bboxes)
 
     def set_color_detector(self):
         self.detector = self.color_detector
@@ -222,12 +216,10 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.detector.set_classes([item])
 
     def select_object(self, event):
-        global running
-        if running or self.detector is not self.yolo_detector:
+        if self.running or self.detector is not self.yolo_detector:
             return
 
-        global bboxes
-        self.videoWidget.setBBoxes(bboxes)
+        self.videoWidget.setBBoxes(self.bboxes)
 
     @staticmethod
     def set_image_on_button(button, stop: bool):
@@ -245,17 +237,16 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         # 1920, 1080, 30
         self.videoWidget.setBBoxes(None)
         global q
-        capture_thread = threading.Thread(target=grab, args=[q])
+        capture_thread = threading.Thread(target=self.grab, args=[q])
         capture_thread.start()
 
     def capture_image(self):
-        global running
         global q
-        self.set_image_on_button(self.captureButton, not running)
-        if running:
-            running = False
+        self.set_image_on_button(self.captureButton, not self.running)
+        if self.running:
+            self.running = False
         else:
-            running = True
+            self.running = True
             q.queue.clear()
             self.resume_camera()
 
@@ -265,16 +256,15 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.imageLabel.setPixmap(scaled_pixmap)
 
     def update_frame(self):
-        global running
-        if not q.empty() and running:
+        if not q.empty() and self.running:
             self.videoWidget.setBBoxes(None)
             img = q.get()
 
-            if self.detector == self.yolo_detector:
-                global image, bboxes
-                img, bboxes = self.yolo_detector.detect_all(img, self.window_width, self.window_height)
-            else:
-                img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
+            img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
+            # if self.detector == self.yolo_detector:
+
+            img, self.bboxes = self.detector.detect_all(img, self.window_width, self.window_height)
+            # else:
 
             height, width, bpc = img.shape
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -284,8 +274,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             self.videoWidget.setImage(image, img)
 
     def closeEvent(self, event):
-        global running
-        running = False
+        self.running = False
 
         self.status = self.STOP
         verbose = {
