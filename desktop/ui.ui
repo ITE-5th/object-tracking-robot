@@ -94,7 +94,7 @@
     <property name="title">
      <string>Distance:</string>
     </property>
-    <widget class="QLineEdit" name="lineEdit_5">
+    <widget class="QLineEdit" name="minXEdit">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -110,7 +110,7 @@
       <string>Min X</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEdit_2">
+    <widget class="QLineEdit" name="maxXEdit">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -126,7 +126,7 @@
       <string>Max X</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEdit_3">
+    <widget class="QLineEdit" name="minRadiusEdit">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -142,7 +142,7 @@
       <string>Min Radius</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEdit_4">
+    <widget class="QLineEdit" name="maxRadiusEdit">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -218,6 +218,9 @@
        <width>155</width>
        <height>29</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: green;</string>
      </property>
      <property name="text">
       <string>Set </string>

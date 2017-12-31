@@ -6,6 +6,7 @@ from queue import Queue
 import cv2
 # from PySide import QtGui
 import qdarkstyle
+import time
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QIcon
@@ -92,7 +93,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def keyPressEvent(self, event1):
         self.status = self.MANUAL
-        self.ui.label_2.setText(self.status)
+        self.label.setText(self.status)
 
         verbose = {"FB": "", "LR": ""}
         if event1.key() == QtCore.Qt.Key_W:
@@ -146,7 +147,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             json_data = json.dumps(verbose)
             self.client.send(json_data)
 
-            self.ui.label_2.setText(self.status)
+            self.label.setText(self.status)
             data_sender_thread = threading.Thread(target=self.data_sender)
             data_sender_thread.start()
 
@@ -157,25 +158,25 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         }
         json_data = json.dumps(verbose)
         self.client.send(json_data)
-        self.ui.label_2.setText(self.status)
+        self.label.setText(self.status)
 
     def robot_initializer(self):
 
         try:
-            x_min = round(float(self.ui.lineEdit_5.text()), 2)
+            x_min = round(float(self.minXEdit.text()), 2)
         except:
             x_min = 200
 
         try:
-            x_max = round(float(self.ui.lineEdit_2.text()), 2)
+            x_max = round(float(self.maxXEdit.text()), 2)
         except:
             x_max = 300
         try:
-            minArea = round(float(self.ui.lineEdit_3.text()), 2)
+            minArea = round(float(self.minRadiusEdit.text()), 2)
         except:
             minArea = 20
         try:
-            maxArea = round(float(self.ui.lineEdit_4.text()), 2)
+            maxArea = round(float(self.maxRadiusEdit.text()), 2)
         except:
             maxArea = 100
 
@@ -204,7 +205,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
                     self.client.send(json_data)
             time.sleep(0.2)
         self.status = self.STOP
-        self.ui.label_2.setText(self.status)
+        self.label.setText(self.status)
 
     def set_yolo_detector(self):
         self.detector = self.yolo_detector
