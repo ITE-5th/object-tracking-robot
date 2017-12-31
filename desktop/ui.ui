@@ -126,7 +126,7 @@
       <string>Max X</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="minRadiusEdit">
+    <widget class="QLineEdit" name="minAreaEdit">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -142,7 +142,7 @@
       <string>Min Radius</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="maxRadiusEdit">
+    <widget class="QLineEdit" name="maxAreaEdit">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -163,12 +163,12 @@
       <rect>
        <x>20</x>
        <y>30</y>
-       <width>56</width>
+       <width>191</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Min X:</string>
+      <string>Minimum X:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_4">
@@ -176,12 +176,12 @@
       <rect>
        <x>20</x>
        <y>90</y>
-       <width>56</width>
+       <width>191</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Max X:</string>
+      <string>Maximum X:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_5">
@@ -189,12 +189,12 @@
       <rect>
        <x>20</x>
        <y>160</y>
-       <width>71</width>
+       <width>191</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Min Radius:</string>
+      <string>Minimum Area:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_6">
@@ -202,12 +202,12 @@
       <rect>
        <x>20</x>
        <y>210</y>
-       <width>71</width>
+       <width>191</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Max Radius:</string>
+      <string>Maximum Area:</string>
      </property>
     </widget>
     <widget class="QPushButton" name="setButton">

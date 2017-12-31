@@ -85,15 +85,16 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.detector = self.yolo_detector
         self.tracker = ObjectTracker()
 
-        self.label = QLabel("Initialization")
-        self.statusBar.addWidget(self.label)
+        self.statusBar.addWidget(QLabel("Status: "))
+        self.statusLabel = QLabel("Initialization")
+        self.statusBar.addWidget(self.statusLabel)
 
         self.client = Client(host=host, port=port)
         self.status = self.STOP
 
     def keyPressEvent(self, event1):
         self.status = self.MANUAL
-        self.label.setText(self.status)
+        self.statusLabel.setText(self.status)
 
         verbose = {"FB": "", "LR": ""}
         if event1.key() == QtCore.Qt.Key_W:
@@ -139,7 +140,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def start_tracking(self):
         self.status = self.RUN
-        if self.object_tracker.is_working:
+        if self.tracker.is_working:
             print('start tracking')
             verbose = {
                 "status": self.RUN
@@ -147,7 +148,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             json_data = json.dumps(verbose)
             self.client.send(json_data)
 
-            self.label.setText(self.status)
+            self.statusLabel.setText(self.status)
             data_sender_thread = threading.Thread(target=self.data_sender)
             data_sender_thread.start()
 
@@ -158,7 +159,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         }
         json_data = json.dumps(verbose)
         self.client.send(json_data)
-        self.label.setText(self.status)
+        self.statusLabel.setText(self.status)
 
     def robot_initializer(self):
 
@@ -172,11 +173,11 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         except:
             x_max = 300
         try:
-            minArea = round(float(self.minRadiusEdit.text()), 2)
+            minArea = round(float(self.minAreaEdit.text()), 2)
         except:
             minArea = 20
         try:
-            maxArea = round(float(self.maxRadiusEdit.text()), 2)
+            maxArea = round(float(self.maxAreaEdit.text()), 2)
         except:
             maxArea = 100
 
@@ -192,9 +193,9 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def data_sender(self):
         verbose = {}
-        while self.object_tracker.is_working and self.status != self.STOP:
-            if len(self.object_tracker.positions) > 0:
-                currentPosition = self.object_tracker.positions[0]
+        while self.tracker.is_working and self.status != self.STOP:
+            if self.tracker.has_positions():
+                currentPosition = self.tracker.first_position()
                 if currentPosition[0] is not None:
                     print(currentPosition)
                     verbose["x"] = currentPosition[0]
@@ -205,7 +206,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
                     self.client.send(json_data)
             time.sleep(0.2)
         self.status = self.STOP
-        self.label.setText(self.status)
+        self.statusLabel.setText(self.status)
 
     def set_yolo_detector(self):
         self.detector = self.yolo_detector

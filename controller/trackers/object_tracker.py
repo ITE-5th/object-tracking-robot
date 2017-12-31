@@ -51,3 +51,9 @@ class ObjectTracker(metaclass=ABCMeta):
 
     def set_detector(self, detector: ObjectDetector):
         self.detector = detector
+
+    def has_positions(self):
+        return self.positions is not None and len(self.positions) > 0
+
+    def first_position(self):
+        return self.positions[0]
