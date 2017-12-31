@@ -23,9 +23,9 @@ FormClass = uic.loadUiType("ui.ui")[0]
 
 
 class Ui(QtWidgets.QMainWindow, FormClass):
-    RUN = 'run'
-    STOP = 'stop'
-    MANUAL = 'manual'
+    RUN = 'Running'
+    STOP = 'Stopped'
+    MANUAL = 'Manual'
     NO_OBJECT = ObjectDetector.NO_OBJECT
 
     def __init__(self, host='raspberrypi', port=1234, url=None):
@@ -47,6 +47,9 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.timer = QtCore.QTimer(self)
         self.lowerBoundColor.clicked.connect(self.set_lower_color)
         self.upperBoundColor.clicked.connect(self.set_upper_color)
+        self.lowerBoundColor.setDisabled(True)
+        self.upperBoundColor.setDisabled(True)
+        self.trackButton.setDisabled(True)
 
         self.setup_camera(url)
 
@@ -160,6 +163,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
     def start_tracking(self):
         self.set_status(self.RUN)
 
+        self.trackButton.setDisabled(True)
         # if self.tracker.is_tracking():
         self.tracker.set_tracking(True)
         self.tracker.detector.set_classes(self.selected_classes)
@@ -176,6 +180,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def stop_tracking(self):
 
+        self.trackButton.setDisabled(False)
         self.tracker.detector.set_classes(None)
         self.tracker.set_tracking(False)
         self.set_status(self.STOP)
@@ -244,15 +249,29 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.statusLabel.setText(self.status)
 
     def set_yolo_detector(self):
+        self.lowerBoundColor.setDisabled(True)
+        self.upperBoundColor.setDisabled(True)
         self.tracker.set_detector(self.yolo_detector)
+        self.tracker.detector.set_classes(self.selected_classes)
         self.videoWidget.setBBoxes(self.bboxes)
 
+        if self.tracker.detector.has_classes():
+            self.trackButton.setDisabled(False)
+        else:
+            self.trackButton.setDisabled(True)
+
     def set_color_detector(self):
+        self.lowerBoundColor.setDisabled(False)
+        self.upperBoundColor.setDisabled(False)
         self.tracker.set_detector(self.color_detector)
         self.videoWidget.setBBoxes(None)
 
+        self.trackButton.setDisabled(False)
+
+
     def item_selected(self, item):
         self.selected_classes = [item]
+        self.trackButton.setDisabled(False)
 
     def select_object(self, event):
         if self.running or self.tracker.detector is not self.yolo_detector:
@@ -293,25 +312,25 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.imageLabel.setPixmap(scaled_pixmap)
 
     def update_frame(self):
-        if not self.queue.empty() and self.running:
-            self.videoWidget.setBBoxes(None)
-            img = self.queue.get()
+        if not self.queue.empty():
 
+            img = self.queue.get()
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
 
-            # if self.tracker.is_tracking():
-            #     new_img = self.tracker.track(img)
-            # else:
-            #     new_img, self.bboxes = self.tracker.detector.detect_all(img)
+            new_img, temp = self.tracker.track(img)
 
-            new_img, self.bboxes = self.tracker.track(img)
+            if self.tracker.detector is not self.yolo_detector:
+                temp = None
 
-            height, width, bpc = new_img.shape
-            new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
-            bpl = bpc * width
+            if self.running:
+                self.bboxes = temp
+                height, width, bpc = new_img.shape
+                new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
+                bpl = bpc * width
 
-            image = QtGui.QImage(new_img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
-            self.videoWidget.setImage(image, img)
+                image = QtGui.QImage(new_img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
+                self.videoWidget.setBBoxes(None)
+                self.videoWidget.setImage(image, img)
 
     def closeEvent(self, event):
         self.running = False
@@ -343,9 +362,10 @@ def main(ip, port, url=None):
 
 
 if __name__ == '__main__':
-    videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
-    IP = "raspberrypi"
-    # IP = "localhost"
+    # videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
+    # IP = "raspberrypi"
+    IP = "localhost"
+    videoURL = None
     PORT = 1234
 
     main(ip=IP, port=PORT, url=videoURL)

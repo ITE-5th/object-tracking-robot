@@ -50,3 +50,9 @@ class YoloObjectDetector(ObjectDetector):
 
     def set_classes(self, classes):
         self.selected_classes = classes
+
+    def get_classes(self):
+        return self.selected_classes
+
+    def has_classes(self):
+        return self.selected_classes is not None and len(self.selected_classes) > 0
