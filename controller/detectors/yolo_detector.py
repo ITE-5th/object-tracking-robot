@@ -27,6 +27,10 @@ class YoloObjectDetector(ObjectDetector):
         bboxes = [box for box in bboxes if
                   self.selected_classes and self.class_names[
                       box[6] % len(self.class_names)] in self.selected_classes and box[5] >= self.threshold]
+
+        if len(bboxes) < 1:
+            return 0, 0, 0, 0, self.NO_OBJECT
+
         box = sorted(bboxes, key=lambda x: x[5])[0]
 
         height, width, _ = draw_img.shape

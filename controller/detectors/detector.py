@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 
 
 class ObjectDetector(metaclass=ABCMeta):
+    NO_OBJECT = "No_Object"
+
     @abstractmethod
     def _detect(self, image):
         raise NotImplementedError()
