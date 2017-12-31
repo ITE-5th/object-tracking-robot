@@ -4,9 +4,10 @@ import time
 
 import RPi.GPIO as GPIO
 import netifaces as ni
+import pigpio
 from motor_controller import QuadMotorController
 from pid import PID
-from range_sensor import RangeSensor
+from range_sensor import sensor
 from server import Server
 
 t = 0.1
@@ -33,20 +34,21 @@ run = "run"
 def range_sensor_updater():
     global range_sensor_value
     print('range Sensor thread is running')
-
-    is_init = False
+    pi = pigpio.pi()
+    sonar = sensor(pi, trigger=23, echo=24)
     while True:
         try:
-            if not is_init:
-                range_sensor = RangeSensor()
-                is_init = True
-            update = range_sensor.update()
-            range_sensor_value = update
-            print('range : {}'.format(range_sensor_value))
+            sonar.trigger()
+            time.sleep(0.1)
+            cms, new = sonar.get_centimetres()
+            if new:
+                range_sensor_value = cms
+                print('range : {}'.format(range_sensor_value))
         except Exception as e:
             print('range Sensor thread is stopped')
             print(e)
-            is_init = False
+            sonar.cancel()
+            pi.stop()
 
 
 def reverse(m_speed=0):

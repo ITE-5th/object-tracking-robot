@@ -38,8 +38,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
         self.client = Client(host=host, port=port)
 
-        # self.object_tracker = ColorBasedObjectTracker(video_url=url, buffer_size=64)
-        self.object_tracker = YoloObjectTracker(video_url=url, buffer_size=64)
+        self.object_tracker = ColorBasedObjectTracker(video_url=url, buffer_size=64)
+        # self.object_tracker = YoloObjectTracker(video_url=url, buffer_size=64)
         self.status = self.STOP
 
     def keyPressEvent(self, event1):
