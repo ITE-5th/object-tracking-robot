@@ -81,6 +81,19 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QPushButton" name="colorPickerButton">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>60</y>
+       <width>21</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">

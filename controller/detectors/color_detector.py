@@ -49,3 +49,7 @@ class ColorObjectDetector(ObjectDetector):
 
     def _detect(self, image):
         return self._detect_all(image)[1]
+
+
+    def get_default_color(self):
+        return self.color_lower
