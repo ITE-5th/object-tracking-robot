@@ -256,13 +256,16 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             img = self.queue.get()
 
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
-            img, self.bboxes = self.detector.detect_all(img)
+            new_img, self.bboxes = self.detector.detect_all(img)
 
-            height, width, bpc = img.shape
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            if new_img is None:
+                new_img = img
+
+            height, width, bpc = new_img.shape
+            new_img = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
             bpl = bpc * width
 
-            image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
+            image = QtGui.QImage(new_img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
             self.videoWidget.setImage(image, img)
 
     def closeEvent(self, event):
