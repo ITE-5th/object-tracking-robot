@@ -89,8 +89,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             self.queue.put(img)
 
     def keyPressEvent(self, event1):
-        self.status = self.MANUAL
-        self.statusLabel.setText(self.status)
+        self.set_status(self.MANUAL)
 
         verbose = {"FB": "", "LR": ""}
         if event1.key() == QtCore.Qt.Key_W:
@@ -144,7 +143,8 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         # self.color_detector.set_color(color)
 
     def start_tracking(self):
-        self.status = self.RUN
+        self.set_status(self.RUN)
+
         # if self.tracker.is_tracking():
         self.tracker.set_tracking(True)
         self.tracker.detector.set_classes(self.selected_classes)
@@ -156,7 +156,6 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         json_data = json.dumps(verbose)
         self.client.send(json_data)
 
-        self.statusLabel.setText(self.status)
         data_sender_thread = threading.Thread(target=self.data_sender)
         data_sender_thread.start()
 
@@ -164,13 +163,12 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
         self.tracker.detector.set_classes(None)
         self.tracker.set_tracking(False)
-        self.status = self.STOP
+        self.set_status(self.STOP)
         verbose = {
             "status": self.STOP
         }
         json_data = json.dumps(verbose)
         self.client.send(json_data)
-        self.statusLabel.setText(self.status)
 
     def robot_initializer(self):
 
