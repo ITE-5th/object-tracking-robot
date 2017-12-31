@@ -131,20 +131,20 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             x_min = round(float(self.ui.lineEdit_5.text()), 2)
         except:
-            x_min = 200
+            x_min = 100
 
         try:
             x_max = round(float(self.ui.lineEdit_2.text()), 2)
         except:
-            x_max = 300
+            x_max = 500
         try:
             minArea = round(float(self.ui.lineEdit_3.text()), 2)
         except:
-            minArea = 20
+            minArea = 2500
         try:
             maxArea = round(float(self.ui.lineEdit_4.text()), 2)
         except:
-            maxArea = 100
+            maxArea = 10000
 
         verbose = {
             "x_min": x_min,

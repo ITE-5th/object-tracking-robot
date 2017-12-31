@@ -52,7 +52,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.window_width = self.videoWidget.frameSize().width()
         self.window_height = self.videoWidget.frameSize().height()
         self.videoWidget = ImageWidget(self.videoWidget, self)
-
+        self.tracker.is_working = True
         self.captureButton.clicked.connect(self.capture_image)
         self.yoloDetectorRB.clicked.connect(self.set_yolo_detector)
         self.colorDetectorRB.clicked.connect(self.set_color_detector)
@@ -131,7 +131,10 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             self.client.send(json_data)
 
     def start_tracking(self):
+
         self.status = self.RUN
+        print('start tracking')
+
         if self.tracker.is_working:
             print('start tracking')
             verbose = {
@@ -185,6 +188,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
     def data_sender(self):
         verbose = {}
+        print(self.tracker.positions)
         while self.tracker.is_working and self.status != self.STOP:
             if self.tracker.has_positions():
                 current_position = self.tracker.first_position()
@@ -257,6 +261,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
 
             img = cv2.resize(img, (self.window_width, self.window_height), interpolation=cv2.INTER_CUBIC)
             new_img, self.bboxes = self.detector.detect_all(img)
+            self.tracker.positions.appendleft(self.bboxes)
 
             if new_img is None:
                 new_img = img
@@ -290,8 +295,8 @@ def main(ip, port, url=None):
 
 
 if __name__ == '__main__':
-    # videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
+    videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
     IP = "raspberrypi"
     PORT = 1234
 
-    main(ip=IP, port=PORT, url=None)
+    main(ip=IP, port=PORT, url=videoURL)
