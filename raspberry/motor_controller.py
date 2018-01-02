@@ -52,31 +52,103 @@ class QuadMotorController:
 
 if __name__ == '__main__':
     x = QuadMotorController()
-    x.move_forward()
+    #x.move_forward()
+    time.sleep(0.5)
+    #x.move_backward()
+    #time.sleep(0.5)
+    
+    x.move_right(right_speed=100)
+    
+    time.sleep(0.2)
+    x.move_right(right_speed=50)
+    
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    #x.move_left()
+    time.sleep(0.1)
     x.stopall()
-    x.move_backward()
-    x.stopall()
-    x.move_right()
-    x.stopall()
-    x.move_left()
-    x.stopall()
-
-    while True:  # making a loop
-        print('waiting')
-        try:  # used try so that if user pressed other than the given key error will not be shown
-            k = input()
-            if k == 'w':  # if key 'q' is pressed
-                x.move_forward()
-            elif k == 's':  # if key 'q' is pressed
-                x.move_backward()
-            elif k == 'd':  # if key 'q' is pressed
-                x.move_right()
-            elif k == 'a':  # if key 'q' is pressed
-                x.move_left()
-            elif k == 'q':  # if key 'q' is pressed
-                print('You Pressed Q Key!')
-                break  # finishing the loop
-            else:
-                pass
-        except:
-            break  # if user pressed other than the given key the loop will break

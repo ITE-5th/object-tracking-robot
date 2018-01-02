@@ -98,6 +98,8 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             self.queue.put(img)
 
     def keyPressEvent(self, event1):
+        if event1.isAutoRepeat():
+            return
         self.set_status(self.MANUAL)
 
         verbose = {"FB": "", "LR": ""}
@@ -121,6 +123,8 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             self.client.send(json_data)
 
     def keyReleaseEvent(self, event):
+        if event.isAutoRepeat():
+            return
         verbose = {"FB": "", "LR": ""}
         if event.key() == QtCore.Qt.Key_W:
             # print "Up rel"
@@ -228,7 +232,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             if self.tracker.has_positions():
                 currentPosition = self.tracker.positions[0]
                 if currentPosition[0] is not None and self.status != self.NO_OBJECT and max_diff(currentPosition,
-                                                                                                 prev_position) > 10:
+                                                                                                 prev_position) > 20:
                     print(currentPosition)
                     verbose["x"] = currentPosition[0]
                     verbose["y"] = currentPosition[1]
