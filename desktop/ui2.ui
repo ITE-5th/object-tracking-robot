@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>951</width>
-    <height>852</height>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -114,7 +114,7 @@
       <x>10</x>
       <y>200</y>
       <width>251</width>
-      <height>471</height>
+      <height>321</height>
      </rect>
     </property>
     <property name="title">
@@ -239,8 +239,8 @@
     <widget class="QPushButton" name="setButton">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>430</y>
+       <x>40</x>
+       <y>280</y>
        <width>155</width>
        <height>29</height>
       </rect>
@@ -252,99 +252,12 @@
       <string>Set </string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="kiEdit">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>330</y>
-       <width>193</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="placeholderText">
-      <string>Maximum Area</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="kpEdit">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>280</y>
-       <width>193</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="placeholderText">
-      <string>Minimum Area</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_7">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>310</y>
-       <width>191</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>KI:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_8">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>260</y>
-       <width>191</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>KP:</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="kdEdit">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>380</y>
-       <width>193</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="placeholderText">
-      <string>Maximum Area</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>360</y>
-       <width>191</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>KD:</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>690</y>
+      <x>10</x>
+      <y>530</y>
       <width>251</width>
       <height>111</height>
      </rect>
