@@ -204,15 +204,15 @@ def auto_movement():
             update = fb_pid.update(area)
             raw_speed = percentage(update, fb_pid.target)
 
-            is_forward = raw_speed > 10
-            is_backward = raw_speed < -10
+            is_forward = raw_speed > 30
+            is_backward = raw_speed < -30
             fb_speed = max(0, min(100, abs(int(raw_speed))))
 
             lr_update = lr_pid.update(x)
             lr_speed = percentage(lr_update, lr_pid.target)
 
-            is_left = lr_speed > 10
-            is_right = lr_speed < -10
+            is_left = lr_speed > 30
+            is_right = lr_speed < -30
 
             lr_speed = max(0, min(100, abs(int(lr_speed))))
             lr_speed = int(map(lr_speed, 0, 100, 0, 100))
@@ -284,5 +284,6 @@ if __name__ == '__main__':
         auto_movement_thread.join()
 
     finally:
+        motor_controller.stopall()
         GPIO.cleanup()
         stopall()
