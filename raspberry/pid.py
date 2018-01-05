@@ -37,15 +37,16 @@ def percentage(part, whole):
 
 
 if __name__ == '__main__':
-    target_area = 3000
+    target_area = 300
     current_area = 200
     # example
-    pid = PID(target=target_area, p=0.8, i=0.9, d=0.06)
+    pid = PID(target=target_area, p=1, i=0.4, d=0.01)
     while True:
-        update = pid.update(current_area)
-        current_area += update
-        # New Speed
+        current_area += 1
 
-        print(percentage(update, pid.target).clamp(min=0, max=100))
+        update = pid.update(current_area)
+        new_index = max(-100, min(percentage(update, pid.target), 100))
+
+        print('{}         {}'.format(update, new_index))
         # print(x)
         time.sleep(0.1)

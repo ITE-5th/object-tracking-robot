@@ -241,7 +241,7 @@ class AMSpi:
             # stop PWM if was used before
             if self._MOTORS[dc_motor][self._PWM_] is not None:
                 # noinspection PyUnresolvedReferences
-                self._MOTORS[dc_motor][self.__PWM__].stop()
+                self._MOTORS[dc_motor][self._PWM_].stop()
                 self._MOTORS[dc_motor][self._PWM_] = None
 
             GPIO.output(self._MOTORS[dc_motor][self._PIN_], GPIO.HIGH)
