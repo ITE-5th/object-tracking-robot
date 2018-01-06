@@ -82,6 +82,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.statusLabel = QLabel("Initialization")
         self.statusBar.addWidget(self.statusLabel)
         self.actionOptions.triggered.connect(self.show_options)
+        self.actionExit.triggered.connect(lambda: self.close())
         self.options_dialog = Pid_Dialog()
 
     def show_options(self):

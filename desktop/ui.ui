@@ -402,7 +402,7 @@
     </property>
     <addaction name="actionOptions"/>
     <addaction name="separator"/>
-    <addaction name="actionEdit"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuTools"/>
   </widget>
@@ -411,7 +411,7 @@
     <string>Options</string>
    </property>
   </action>
-  <action name="actionEdit">
+  <action name="actionExit">
    <property name="text">
     <string>Exit</string>
    </property>
