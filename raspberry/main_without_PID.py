@@ -6,14 +6,8 @@ import RPi.GPIO as GPIO
 import netifaces as ni
 import pigpio
 from motor_controller import QuadMotorController
-from pid import PID
 from range_sensor import sensor
 from server import Server
-
-# from raspberry.motor_controller import QuadMotorController
-# from raspberry.pid import PID
-# from raspberry.range_sensor import sensor
-# from raspberry.server import Server
 
 status = ""
 
@@ -30,9 +24,6 @@ x_min = 70
 x_max = 200
 maxArea = 800
 minArea = 200
-
-fb_pid = PID(target=6250, p=1, i=0.5, d=0.01)
-lr_pid = PID(target=500, p=1, i=0, d=0.5)
 
 motor_controller = QuadMotorController()
 
@@ -151,7 +142,7 @@ def movement():
             maxArea = json_message.get("maxArea")
             minArea = json_message.get("minArea")
             # fb_pid.target = (minArea + maxArea) / 2
-            fb_pid = PID((minArea + maxArea) / 2,
+            lr_pid = PID(target=500,
                          p=json_message.get("P"),
                          i=json_message.get("I"),
                          d=json_message.get("D"))
@@ -222,41 +213,14 @@ def auto_movement():
             no_object_loops = 0
 
             area = width * height
-            fb_update = fb_pid.update(area)
-            fb_speed = percentage(fb_update, fb_pid.target)
-            #
-            is_forward = fb_speed > 30
-            is_backward = fb_speed < -30
-            fb_speed = max(0, min(100, abs(int(fb_speed))))
-            fb_speed = int(map(fb_speed, 0, 100, 0, 50))
 
-            lr_update = lr_pid.update(x)
-            lr_speed = percentage(lr_update, lr_pid.target)
-            #
-            is_left = lr_speed > 10
-            is_right = lr_speed < -10
-            #
-            lr_speed = max(0, min(100, abs(int(lr_speed))))
-            lr_speed = int(map(lr_speed, 0, 100, 0, 25))
+            is_forward = area < minArea
+            is_backward = area > maxArea
+            is_right = x > 800
+            is_left = x < 200
 
-            # print('******************************')
-            # print('lr speed is :{} {} {}'.format(fb_speed, is_forward, is_backward))
-            # print('x is :{}'.format(area))
-            # print('******************************')
-            # is_forward = area < minArea
-            # is_backward = area > maxArea
-            # is_right = x > 800
-            # is_left = x < 200
-            #
-            # lr_speed = 25
-            # fb_speed = 25
-            # print()
-            print('******************************')
-            print('fb speed is :{}'.format(fb_speed))
-            print('area is :{}'.format(area))
-            print('******************************')
-            # is_forward = False
-            # is_backward = False
+            lr_speed = 25
+            fb_speed = 25
             if is_left:
                 turnleft(m_speed=lr_speed)
                 x += 100 * (lr_speed / 100)
@@ -266,28 +230,16 @@ def auto_movement():
                 x -= 100 * (lr_speed / 100)
                 last_turn = 'R'
 
-            # elif lr_speed < 10:
-            #     stopall()
-            # time.sleep(0.1)
-
-            # motor_controller.stopall()
-
             if is_forward:
                 forwards(m_speed=fb_speed)
-                area += 400 * (fb_speed / 100)
+                # area += 600 * (fb_speed / 100)
             elif is_backward:
                 reverse(m_speed=fb_speed)
-                area -= 400 * (fb_speed / 100)
+                # area -= 600 * (fb_speed / 100)
 
             time.sleep(0.1)
             turnright(m_speed=0)
-
-            # elif fb_speed < 10:
-            #     stopall()
-            # time.sleep(0.2)
-            # stopall()
-            # time.sleep(0.2)
-        elif status == no_object:
+        elif status == no_object and False:
             if no_object_loops < 5:
                 no_object_loops += 1
                 if last_turn == 'R':
