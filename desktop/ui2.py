@@ -19,7 +19,7 @@ from controller.detectors.yolo_detector import YoloObjectDetector
 from controller.trackers.object_tracker import ObjectTracker
 from desktop.image_widget import ImageWidget
 
-FormClass = uic.loadUiType("ui.ui")[0]
+FormClass = uic.loadUiType("ui2.ui")[0]
 
 
 class Ui(QtWidgets.QMainWindow, FormClass):
@@ -212,28 +212,11 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         except:
             maxArea = 100
 
-        try:
-            kp = round(float(self.kpEdit.text()), 2)
-        except:
-            kp = 0
-
-        try:
-            ki = round(float(self.kiEdit.text()), 2)
-        except:
-            ki = 0
-        try:
-            kd = round(float(self.kdEdit.text()), 2)
-        except:
-            kd = 0
-
         verbose = {
             "x_min": x_min,
             "x_max": x_max,
             "maxArea": maxArea,
-            "minArea": minArea,
-            "kp": kp,
-            "ki": ki,
-            "kd": kd
+            "minArea": minArea
         }
         json_data = json.dumps(verbose)
         print(json_data)
