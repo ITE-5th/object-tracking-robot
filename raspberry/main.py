@@ -31,7 +31,7 @@ x_max = 200
 maxArea = 800
 minArea = 200
 
-fb_pid = PID(target=6250, p=1, i=0.5, d=0.01)
+fb_pid = PID(target=10000, p=0.5, i=0, d=0.5)
 lr_pid = PID(target=500, p=1, i=0, d=0.5)
 
 motor_controller = QuadMotorController()
@@ -279,7 +279,7 @@ def auto_movement():
                 reverse(m_speed=fb_speed)
                 area -= 400 * (fb_speed / 100)
 
-            time.sleep(0.1)
+            time.sleep(0.05)
             turnright(m_speed=0)
 
             # elif fb_speed < 10:
@@ -288,6 +288,7 @@ def auto_movement():
             # stopall()
             # time.sleep(0.2)
         elif status == no_object:
+            print('********** No Object **********')
             if no_object_loops < 5:
                 no_object_loops += 1
                 if last_turn == 'R':
