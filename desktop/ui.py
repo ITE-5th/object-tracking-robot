@@ -18,6 +18,7 @@ from controller.detectors.detector import ObjectDetector
 from controller.detectors.yolo_detector import YoloObjectDetector
 from controller.trackers.object_tracker import ObjectTracker
 from desktop.image_widget import ImageWidget
+from desktop.pid_dialog import Pid_Dialog
 
 FormClass = uic.loadUiType("ui.ui")[0]
 
@@ -80,6 +81,29 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.statusBar.addWidget(QLabel("Status: "))
         self.statusLabel = QLabel("Initialization")
         self.statusBar.addWidget(self.statusLabel)
+        self.actionOptions.triggered.connect(self.show_options)
+        self.actionExit.triggered.connect(lambda: self.close())
+        self.options_dialog = Pid_Dialog()
+
+    def show_options(self):
+        result, kp_f, ki_f, kd_f, kp_s, ki_s, kd_s = self.options_dialog.get_values()
+
+        if not result:
+            return
+
+        verbose = {
+            "kp_f": kp_f,
+            "ki_f": ki_f,
+            "kd_f": kd_f,
+
+            "kp_s": kp_s,
+            "ki_s": ki_s,
+            "kd_s": kd_s,
+        }
+
+        json_data = json.dumps(verbose)
+        print(json_data)
+        self.client.send(json_data)
 
     def setup_camera(self, url=None, width=304, height=304, fps=30):
         if url is None:
@@ -274,7 +298,6 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.videoWidget.setBBoxes(None)
 
         self.trackButton.setDisabled(False)
-
 
     def item_selected(self, item):
         self.selected_classes = [item]
