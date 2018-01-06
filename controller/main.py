@@ -19,9 +19,9 @@ def max_diff(current_position, prev_position):
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    RUN = 'run'
-    STOP = 'stop'
-    MANUAL = 'manual'
+    RUN = 'Running'
+    STOP = 'Stopped'
+    MANUAL = 'Manual'
     NO_OBJECT = ObjectTracker.NO_OBJECT
 
     def __init__(self, host='raspberrypi', port=1234, url=None):
@@ -151,6 +151,9 @@ class MainWindow(QtWidgets.QMainWindow):
             "x_max": x_max,
             "maxArea": maxArea,
             "minArea": minArea,
+            "P": 1,
+            "I": 0,
+            "D": 0.5,
         }
         json_data = json.dumps(verbose)
         print(json_data)

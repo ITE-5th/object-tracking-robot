@@ -68,46 +68,58 @@ def range_sensor_updater():
 
 
 def reverse(m_speed=None):
-    global motor_status
-    if motor_status != 'forward':
-        time.sleep(0.1)
-    motor_status = 'forward'
-    motor_controller.move_backward(back_speed=m_speed)
+    global motor_controller, motor_status
+    try:
+        if motor_status != 'backward':
+            time.sleep(0.1)
+        motor_status = 'backward'
+        motor_controller.move_backward(back_speed=m_speed)
     # setLEDs(1, 0, 0, 1)
     # print('straight')
+    except:
+        motor_controller = QuadMotorController()
 
 
 def forwards(m_speed=None):
-    global motor_status
-    if motor_status != 'forward':
-        time.sleep(0.1)
-    motor_status = 'forward'
-    if range_sensor_value > 30:
-        motor_controller.move_forward(forward_speed=m_speed)
-    else:
-        print('RANGE SENSOR : {} cm'.format(range_sensor_value))
+    global motor_controller, motor_status
+    try:
+        if motor_status != 'forward':
+            time.sleep(0.1)
+        motor_status = 'forward'
+        if range_sensor_value > 30:
+            motor_controller.move_forward(forward_speed=m_speed)
+        else:
+            print('RANGE SENSOR : {} cm'.format(range_sensor_value))
     # setLEDs(0, 1, 1, 0)
     # print('straight')
+    except:
+        motor_controller = QuadMotorController()
 
 
 def turnright(m_speed=None):
-    global motor_status
-    if motor_status != 'right':
-        time.sleep(0.1)
-    motor_status = 'right'
-    motor_controller.move_right(right_speed=m_speed)
-    # setLEDs(0, 0, 1, 1)
-    # print('left')
+    global motor_controller, motor_status
+    try:
+        if motor_status != 'right':
+            time.sleep(0.1)
+        motor_status = 'right'
+        motor_controller.move_right(right_speed=m_speed)
+        # setLEDs(0, 0, 1, 1)
+        # print('left')
+    except:
+        motor_controller = QuadMotorController()
 
 
 def turnleft(m_speed=None):
-    global motor_status
-    if motor_status != 'left':
-        time.sleep(0.1)
-    motor_status = 'left'
-    motor_controller.move_left(left_speed=m_speed)
-    # setLEDs(1, 1, 0, 0)
-    # print('right')
+    global motor_controller, motor_status
+    try:
+        if motor_status != 'left':
+            time.sleep(0.1)
+        motor_status = 'left'
+        motor_controller.move_left(left_speed=m_speed)
+        # setLEDs(1, 1, 0, 0)
+        # print('right')
+    except:
+        motor_controller = QuadMotorController()
 
 
 def stopall():
@@ -120,7 +132,7 @@ def stopall():
 
 
 def movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid
     print("started")
 
     while True:
@@ -134,7 +146,12 @@ def movement():
             x_max = json_message.get("x_max")
             maxArea = json_message.get("maxArea")
             minArea = json_message.get("minArea")
-            fb_pid.target = (minArea + maxArea) / 2
+            # fb_pid.target = (minArea + maxArea) / 2
+            fb_pid = PID(target=(minArea + maxArea) / 2,
+                         p=json_message.get("P"),
+                         i=json_message.get("I"),
+                         d=json_message.get("D"))
+
             print("Got Min and Max")
 
         if "status" in message:
@@ -159,7 +176,7 @@ def movement():
 
         LR = json_message.get("LR")
 
-        manual_speed = 100
+        manual_speed = 50
         # print FB + " " + LR + str(len(FB)) + str(len(LR))
         if FB == "F":
             forwards(m_speed=manual_speed)
@@ -201,25 +218,26 @@ def auto_movement():
             no_object_loops = 0
 
             area = width * height
-            update = fb_pid.update(area)
-            raw_speed = percentage(update, fb_pid.target)
+            fb_update = fb_pid.update(area)
+            fb_speed = percentage(fb_update, fb_pid.target)
 
-            is_forward = raw_speed > 30
-            is_backward = raw_speed < -30
-            fb_speed = max(0, min(100, abs(int(raw_speed))))
+            is_forward = fb_speed > 30
+            is_backward = fb_speed < -30
+            fb_speed = max(0, min(100, abs(int(fb_speed))))
+            fb_speed = int(map(fb_speed, 0, 100, 0, 50))
 
             lr_update = lr_pid.update(x)
             lr_speed = percentage(lr_update, lr_pid.target)
 
-            is_left = lr_speed > 30
-            is_right = lr_speed < -30
+            is_left = lr_speed > 10
+            is_right = lr_speed < -10
 
             lr_speed = max(0, min(100, abs(int(lr_speed))))
-            lr_speed = int(map(lr_speed, 0, 100, 0, 100))
+            lr_speed = int(map(lr_speed, 0, 100, 10, 70))
 
             print('******************************')
-            print('lr speed is :{} {} {}'.format(lr_speed, is_left, is_right))
-            print('x is :{}'.format(x))
+            print('lr speed is :{} {} {}'.format(fb_speed, is_forward, is_backward))
+            print('x is :{}'.format(area))
             print('******************************')
             # is_forward = area < minArea
             # is_backward = area > maxArea
@@ -229,29 +247,32 @@ def auto_movement():
             # print('fb speed is :{}'.format(fb_speed))
             # print('area is :{}'.format(area))
             # print('******************************')
-
-            if is_left:
-                turnleft(m_speed=lr_speed)
-                x += 500 * (lr_speed / 100)
-                # last_turn = 'L'
-            elif is_right:
-                turnright(m_speed=lr_speed)
-                x -= 500 * (lr_speed / 100)
-                # last_turn = 'R'
-            elif lr_speed < 10:
-                stopall()
+            # is_forward = False
+            # is_backward = False
+            # if is_left:
+            #     turnleft(m_speed=lr_speed)
+            #     x += 600 * (lr_speed / 100)
+            #     last_turn = 'L'
+            # elif is_right:
+            #     turnright(m_speed=lr_speed)
+            #     x -= 600 * (lr_speed / 100)
+            #     last_turn = 'R'
+            # elif lr_speed < 10:
+            #     stopall()
 
             # motor_controller.stopall()
             #
             if is_forward:
                 forwards(m_speed=fb_speed)
-                area += 300 * (fb_speed / 100)
+                area += 600 * (fb_speed / 100)
             elif is_backward:
                 reverse(m_speed=fb_speed)
-                area -= 300 * (fb_speed / 100)
-            elif fb_speed < 10:
-                stopall()
-
+                area -= 600 * (fb_speed / 100)
+            # elif fb_speed < 10:
+            #     stopall()
+            time.sleep(0.05)
+            stopall()
+            time.sleep(0.01)
         elif status == no_object and False:
             if no_object_loops < 5:
                 no_object_loops += 1

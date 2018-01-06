@@ -81,7 +81,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         self.statusLabel = QLabel("Initialization")
         self.statusBar.addWidget(self.statusLabel)
 
-    def setup_camera(self, url=None, width=1920, height=1080, fps=5):
+    def setup_camera(self, url=None, width=304, height=304, fps=30):
         if url is None:
             self.capture = cv2.VideoCapture(0)
         else:
@@ -219,6 +219,9 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             "x_max": x_max,
             "maxArea": maxArea,
             "minArea": minArea,
+            "P": float(self.kpEdit.text()),
+            "I": float(self.kiEdit.text()),
+            "D": float(self.kdEdit.text()),
         }
         json_data = json.dumps(verbose)
         print(json_data)
@@ -232,7 +235,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             if self.tracker.has_positions():
                 currentPosition = self.tracker.positions[0]
                 if currentPosition[0] is not None and self.status != self.NO_OBJECT and max_diff(currentPosition,
-                                                                                                 prev_position) > 20:
+                                                                                                 prev_position) > 5:
                     print(currentPosition)
                     verbose["x"] = currentPosition[0]
                     verbose["y"] = currentPosition[1]
@@ -245,7 +248,7 @@ class Ui(QtWidgets.QMainWindow, FormClass):
                     self.set_status(self.NO_OBJECT)
                 elif self.status == self.NO_OBJECT:
                     self.set_status(self.RUN)
-            time.sleep(0.2)
+            time.sleep(0.05)
         self.set_status(self.STOP)
 
     def set_status(self, status):

@@ -52,11 +52,11 @@ class QuadMotorController:
 
 if __name__ == '__main__':
     x = QuadMotorController()
+    # time.sleep(0.5)
     #x.move_forward()
-    time.sleep(0.5)
     #x.move_backward()
     #time.sleep(0.5)
-    
+
     x.move_right(right_speed=100)
     
     time.sleep(0.2)
