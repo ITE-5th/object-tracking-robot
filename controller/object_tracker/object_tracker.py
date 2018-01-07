@@ -14,6 +14,7 @@ class ObjectTracker(metaclass=ABCMeta):
         self.buffer_size = buffer_size
         self.time_step = time_step
         self.positions = deque(maxlen=self.buffer_size)
+
         self.is_working = False
         self.interpolater = interpolater
 

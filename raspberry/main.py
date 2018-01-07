@@ -16,7 +16,10 @@ from server import Server
 # from raspberry.server import Server
 
 
-t = 0.1
+run = 'Running'
+STOP = 'Stopped'
+MANUAL = 'Manual'
+
 fb_speed = 0
 lr_speed = 0
 
@@ -34,12 +37,11 @@ motor_controller = QuadMotorController()
 range_sensor_value = 100
 
 no_object = "no_object"
-run = 'Running'
-STOP = 'Stopped'
-MANUAL = 'Manual'
-status = run
-
 motor_status = 'stop'
+status = STOP
+# Used For optimizing no object status
+is_balanced = True
+no_obj_flag = True
 
 
 def range_sensor_updater():
@@ -54,7 +56,7 @@ def range_sensor_updater():
             cms, new = sonar.get_centimetres()
             if new:
                 range_sensor_value = cms
-                print('range : {}'.format(range_sensor_value))
+                # print('range : {}'.format(range_sensor_value))
         except Exception as e:
             print('range Sensor thread is stopped')
             print(e)
@@ -118,7 +120,7 @@ def stopall(force=False):
 
 
 def movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid, area
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid, area, no_obj_flag
     print("started")
 
     while True:
@@ -161,9 +163,10 @@ def movement():
             area = width * height
             print("x = {}, y = {}, width = {}, height = {}".format(x, y, width, height))
             if x == 0 and y == 0 and width == 0 and height == 0:
-                status = no_object
+                no_obj_flag = True
             elif status == no_object:
                 status = run
+                no_obj_flag = False
 
         FB = json_message.get("FB")
 
@@ -201,7 +204,7 @@ def map(value, istart, istop, ostart, ostop):
 
 
 def auto_movement():
-    global status, x_min, x_max, maxArea, minArea, x, y, fb_speed, fb_pid, area
+    global status, x_min, x_max, maxArea, minArea, x, y, fb_speed, lr_speed, fb_pid, area, is_balanced, no_obj_flag
     last_turn = 'L'
     no_object_loops = 0
     while True:
@@ -209,11 +212,14 @@ def auto_movement():
 
             no_object_loops = 0
 
+            # Calculate PID updates
+
             fb_update = fb_pid.update(area)
             fb_speed = percentage(fb_update, fb_pid.target)
             #
             is_forward = fb_speed > 20
             is_backward = fb_speed < -20
+
             fb_speed = max(0, min(100, abs(int(fb_speed))))
             fb_speed = int(map(fb_speed, 0, 100, 0, 50))
 
@@ -226,24 +232,8 @@ def auto_movement():
             lr_speed = max(0, min(100, abs(int(lr_speed))))
             lr_speed = int(map(lr_speed, 0, 100, 0, 25))
 
-            # print('******************************')
-            # print('lr speed is :{} {} {}'.format(fb_speed, is_forward, is_backward))
-            # print('x is :{}'.format(area))
-            # print('******************************')
-            # is_forward = area < minArea
-            # is_backward = area > maxArea
-            # is_right = x > 800
-            # is_left = x < 200
-            #
-            # lr_speed = 25
-            # fb_speed = 25
-            # print()
-            print('******************************')
-            print('fb speed is :{}'.format(fb_speed))
-            print('area is :{}'.format(area))
-            print('******************************')
-            # is_forward = False
-            # is_backward = False
+            print_status(area, fb_speed, is_left, is_right, lr_speed)
+
             if is_left:
                 turnleft(m_speed=lr_speed)
                 x += 100 * (lr_speed / 100)
@@ -253,12 +243,6 @@ def auto_movement():
                 x -= 100 * (lr_speed / 100)
                 last_turn = 'R'
 
-            # elif lr_speed < 10:
-            #     stopall()
-            # time.sleep(0.1)
-
-            # motor_controller.stopall()
-
             if is_forward:
                 forwards(m_speed=fb_speed)
                 area += 400 * (fb_speed / 100)
@@ -266,9 +250,10 @@ def auto_movement():
                 reverse(m_speed=fb_speed)
                 area -= 400 * (fb_speed / 100)
 
+            if no_obj_flag and not is_left and not is_right and not is_forward and not is_backward:
+                status = no_object
             time.sleep(0.05)
-            turnright(m_speed=0)
-
+            stopall()
         elif status == no_object:
             print('********** No Object **********')
             if no_object_loops < 15:
@@ -282,6 +267,17 @@ def auto_movement():
                 time.sleep(0.5)
         else:
             time.sleep(1)
+
+
+def print_status(area, fb_speed, is_left, is_right, lr_speed):
+    print('******************************')
+    print('lr speed is :{} {} {}'.format(lr_speed, is_right, is_left))
+    print('x is :{}'.format(area))
+    print('******************************')
+    print('******************************')
+    print('fb speed is :{} {} {}'.format(fb_speed, is_right, is_left))
+    print('area is :{}'.format(area))
+    print('******************************')
 
 
 if __name__ == '__main__':
