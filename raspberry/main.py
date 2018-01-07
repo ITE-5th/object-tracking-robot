@@ -22,13 +22,9 @@ lr_speed = 0
 
 x = 0
 y = 0
-width = 0
-height = 0
-
-x_min = 70
-x_max = 200
-maxArea = 800
-minArea = 200
+area = 0
+x_min = 200
+x_max = 800
 
 fb_pid = PID(target=10000, p=0.5, i=0, d=0.5)
 lr_pid = PID(target=500, p=1, i=0, d=0.5)
@@ -57,9 +53,8 @@ def range_sensor_updater():
             time.sleep(0.1)
             cms, new = sonar.get_centimetres()
             if new:
-                # range_sensor_value = cms
-                range_sensor_value = 100
-                # print('range : {}'.format(range_sensor_value))
+                range_sensor_value = cms
+                print('range : {}'.format(range_sensor_value))
         except Exception as e:
             print('range Sensor thread is stopped')
             print(e)
@@ -83,15 +78,11 @@ def reverse(m_speed=None):
 def forwards(m_speed=None):
     global motor_controller, motor_status
     try:
-        # if motor_status != 'forward':
-        #     time.sleep(0.1)
         motor_status = 'forward'
         if range_sensor_value > 30:
             motor_controller.move_forward(forward_speed=m_speed)
         else:
             print('RANGE SENSOR : {} cm'.format(range_sensor_value))
-    # setLEDs(0, 1, 1, 0)
-    # print('straight')
     except:
         motor_controller = QuadMotorController()
 
@@ -99,12 +90,8 @@ def forwards(m_speed=None):
 def turnright(m_speed=None):
     global motor_controller, motor_status
     try:
-        # if motor_status != 'right':
-        #     time.sleep(0.1)
         motor_status = 'right'
         motor_controller.move_right(right_speed=m_speed)
-        # setLEDs(0, 0, 1, 1)
-        # print('left')
     except:
         motor_controller = QuadMotorController()
 
@@ -112,31 +99,26 @@ def turnright(m_speed=None):
 def turnleft(m_speed=None):
     global motor_controller, motor_status
     try:
-        # if motor_status != 'left':
-        #     time.sleep(0.1)
         motor_status = 'left'
         motor_controller.move_left(left_speed=m_speed)
-        # setLEDs(1, 1, 0, 0)
-        # print('right')
     except:
         motor_controller = QuadMotorController()
 
 
-def stopall():
+def stopall(force=False):
     global motor_controller, motor_status
     try:
-        time.sleep(0.1)
-        # motor_controller.stopall()
-        motor_controller.move_left(left_speed=0)
+        if force:
+            motor_controller.stopall()
+        else:
+            motor_controller.move_left(left_speed=0)
         motor_status = 'stop'
-        # setLEDs(1, 1, 1, 1)
-        # print('stop')
     except:
         motor_controller = QuadMotorController()
 
 
 def movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid, area
     print("started")
 
     while True:
@@ -145,16 +127,22 @@ def movement():
         print("Got >>", message, " form : ", address)
         json_message = json.loads(message)
 
+        if "kp_f" in message:
+            fb_pid.kp = json_message.get("kp_f")
+            fb_pid.ki = json_message.get("ki_f")
+            fb_pid.kd = json_message.get("kd_f")
+
+            lr_pid.kp = json_message.get("kp_s")
+            lr_pid.ki = json_message.get("ki_s")
+            lr_pid.kd = json_message.get("kd_s")
+
         if "x_min" in message:
             x_min = json_message.get("x_min")
             x_max = json_message.get("x_max")
             maxArea = json_message.get("maxArea")
             minArea = json_message.get("minArea")
-            # fb_pid.target = (minArea + maxArea) / 2
-            fb_pid = PID((minArea + maxArea) / 2,
-                         p=json_message.get("P"),
-                         i=json_message.get("I"),
-                         d=json_message.get("D"))
+            fb_pid.target = (minArea + maxArea) / 2
+            lr_pid.target = (x_min + x_max) / 2
 
             print("Got Min and Max")
 
@@ -170,6 +158,7 @@ def movement():
             y = json_message.get("y")
             width = json_message.get("width")
             height = json_message.get("height")
+            area = width * height
             print("x = {}, y = {}, width = {}, height = {}".format(x, y, width, height))
             if x == 0 and y == 0 and width == 0 and height == 0:
                 status = no_object
@@ -212,7 +201,7 @@ def map(value, istart, istop, ostart, ostop):
 
 
 def auto_movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_speed, fb_pid
+    global status, x_min, x_max, maxArea, minArea, x, y, fb_speed, fb_pid, area
     last_turn = 'L'
     no_object_loops = 0
     while True:
@@ -220,7 +209,6 @@ def auto_movement():
 
             no_object_loops = 0
 
-            area = width * height
             fb_update = fb_pid.update(area)
             fb_speed = percentage(fb_update, fb_pid.target)
             #
@@ -273,21 +261,14 @@ def auto_movement():
 
             if is_forward:
                 forwards(m_speed=fb_speed)
-                width += 20 * (fb_speed / 100)
-                height += 20 * (fb_speed / 100)
+                area += 400 * (fb_speed / 100)
             elif is_backward:
                 reverse(m_speed=fb_speed)
-                width -= 20 * (fb_speed / 100)
-                height -= 20 * (fb_speed / 100)
+                area -= 400 * (fb_speed / 100)
 
             time.sleep(0.05)
             turnright(m_speed=0)
 
-            # elif fb_speed < 10:
-            #     stopall()
-            # time.sleep(0.2)
-            # stopall()
-            # time.sleep(0.2)
         elif status == no_object:
             print('********** No Object **********')
             if no_object_loops < 15:
@@ -312,15 +293,16 @@ if __name__ == '__main__':
         range_sensor_thread = threading.Thread(target=range_sensor_updater)
         movement_thread = threading.Thread(target=movement)
         auto_movement_thread = threading.Thread(target=auto_movement)
-        # range_sensor_thread.start()
+        range_sensor_thread.start()
         movement_thread.start()
         auto_movement_thread.start()
 
-        # range_sensor_thread.join()
+        #  Join Thread to Stop together
+        range_sensor_thread.join()
         movement_thread.join()
         auto_movement_thread.join()
 
     finally:
-        motor_controller.stopall()
+        # Force STOP MOTORS
+        stopall(force=True)
         GPIO.cleanup()
-        stopall()

@@ -22,7 +22,7 @@ class Pid_Dialog(QDialog):
         try:
             kp_side = round(float(self.dialog.kp_side_edit.text()), 2)
         except:
-            kp_side = 0
+            kp_side = 1
         try:
             ki_side = round(float(self.dialog.ki_side_edit.text()), 2)
         except:
@@ -30,20 +30,20 @@ class Pid_Dialog(QDialog):
         try:
             kd_side = round(float(self.dialog.kd_side_edit.text()), 2)
         except:
-            kd_side = 0
+            kd_side = 0.5
 
         try:
-            kp_forward = round(float(self.dialog.kp_side_edit.text()), 2)
+            kp_forward = round(float(self.dialog.kp_forward_edit.text()), 2)
         except:
-            kp_forward = 0
+            kp_forward = 0.5
         try:
-            ki_forward = round(float(self.dialog.ki_side_edit.text()), 2)
+            ki_forward = round(float(self.dialog.ki_forward_edit.text()), 2)
         except:
             ki_forward = 0
         try:
-            kd_forward = round(float(self.dialog.kd_side_edit.text()), 2)
+            kd_forward = round(float(self.dialog.kd_forward_edit.text()), 2)
         except:
-            kd_forward = 0
+            kd_forward = 0.5
 
         return result, kp_forward, ki_forward, kd_forward, kp_side, ki_side, kd_side
 

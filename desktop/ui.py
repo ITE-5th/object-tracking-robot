@@ -105,6 +105,9 @@ class Ui(QtWidgets.QMainWindow, FormClass):
         print(json_data)
         self.client.send(json_data)
 
+    def closeEvent(self, event):
+        self.stop_tracking()
+
     def setup_camera(self, url=None, width=304, height=304, fps=30):
         if url is None:
             self.capture = cv2.VideoCapture(0)
@@ -243,9 +246,6 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             "x_max": x_max,
             "maxArea": maxArea,
             "minArea": minArea,
-            "P": float(self.kpEdit.text()),
-            "I": float(self.kiEdit.text()),
-            "D": float(self.kdEdit.text()),
         }
         json_data = json.dumps(verbose)
         print(json_data)

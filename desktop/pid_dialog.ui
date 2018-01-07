@@ -64,7 +64,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>0.5</string>
     </property>
     <property name="placeholderText">
      <string>Maximum Area</string>
@@ -106,7 +106,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>1</string>
     </property>
     <property name="placeholderText">
      <string>Minimum Area</string>
@@ -123,6 +123,9 @@
     </property>
     <property name="text">
      <string>0</string>
+    </property>
+    <property name="cursorPosition">
+     <number>1</number>
     </property>
     <property name="placeholderText">
      <string>Maximum Area</string>
@@ -177,7 +180,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>0.5</string>
     </property>
     <property name="placeholderText">
      <string>Maximum Area</string>
@@ -206,7 +209,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>0.5</string>
+    </property>
+    <property name="cursorPosition">
+     <number>3</number>
     </property>
     <property name="placeholderText">
      <string>Minimum Area</string>
@@ -223,6 +229,9 @@
     </property>
     <property name="text">
      <string>0</string>
+    </property>
+    <property name="cursorPosition">
+     <number>1</number>
     </property>
     <property name="placeholderText">
      <string>Maximum Area</string>
