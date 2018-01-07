@@ -11,15 +11,7 @@ class ColorBasedObjectTracker(ObjectTracker):
         self.color_lower = color_lower
         self.color_upper = color_upper
 
-    def _track(self, camera):
-
-        # grab the current frame
-        (grabbed, frame) = camera.read()
-
-        # if we are viewing a video and we did not grab a frame,
-        # then we have reached the end of the video
-        if self.url is None and not grabbed:
-            return False
+    def _track(self, frame):
         # resize the frame, blur it, and convert it to the HSV
         # color space
         # frame = imutils.resize(frame, width=600)

@@ -1,13 +1,13 @@
 import json
 import threading
 import time
-
 import RPi.GPIO as GPIO
 import netifaces as ni
 import pigpio
-from motor_controller import QuadMotorController
-from range_sensor import sensor
-from server import Server
+from raspberry.motor_controller import QuadMotorController
+from raspberry.pid import PID
+from raspberry.range_sensor import sensor
+from raspberry.server import Server
 
 status = ""
 

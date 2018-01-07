@@ -1,7 +1,7 @@
 """
    Servo Example - Example of usage ASMpi class
 """
-from AMSpi import AMSpi
+from raspberry.AMSpi import AMSpi
 import time
 
 

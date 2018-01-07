@@ -24,14 +24,17 @@ class ObjectTracker(metaclass=ABCMeta):
         else:
             camera = cv2.VideoCapture(self.url)
         try:
-            while self._track(camera):
-                pass
-                # next_position = self.interpolater.predict(self.positions)
+            while True:
+                (grabbed, frame) = camera.read()
+                if self.url is None and not grabbed:
+                    return False
+                if not self._track(frame):
+                    return False
         finally:
             camera.release()
             cv2.destroyAllWindows()
             self.is_working = False
 
     @abstractmethod
-    def _track(self, camera) -> bool:
+    def _track(self, frame) -> bool:
         raise NotImplementedError()
