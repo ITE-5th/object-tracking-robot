@@ -1,7 +1,7 @@
 """
    Servo Example - Example of usage ASMpi class
 """
-from raspberry.AMSpi import AMSpi
+from AMSpi import AMSpi
 import time
 
 
@@ -58,6 +58,43 @@ if __name__ == '__main__':
     #time.sleep(0.5)
 
     x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    x.move_forward(forward_speed=20)
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    x.move_forward(forward_speed=20)
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    x.move_forward(forward_speed=20)
+    x.move_forward(forward_speed=20)
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    x.move_forward(forward_speed=20)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
+    
+    x.move_right(right_speed=100)
+    x.move_left(left_speed=50)
     
     time.sleep(0.2)
     x.move_right(right_speed=50)
@@ -66,16 +103,11 @@ if __name__ == '__main__':
     
     x.move_right(right_speed=50)
     time.sleep(0.1)
+ 
     
-    x.move_left(left_speed=50)
-    time.sleep(0.1)
+    x.move_left(left_speed=0)
+    time.sleep(0.6)
     
-    
-    x.move_right(right_speed=50)
-    time.sleep(0.1)
-    
-    x.move_left(left_speed=50)
-    time.sleep(0.1)
     
     x.move_right(right_speed=50)
     time.sleep(0.1)
@@ -147,8 +179,14 @@ if __name__ == '__main__':
     time.sleep(0.1)
     
     x.move_left(left_speed=50)
+    time.sleep(0.1)
+    
+    x.move_right(right_speed=50)
+    time.sleep(0.1)
+    
+    x.move_left(left_speed=0)
     time.sleep(0.1)
     
     #x.move_left()
-    time.sleep(0.1)
-    x.stopall()
+    time.sleep(0.4)
+   # x.stopall()
