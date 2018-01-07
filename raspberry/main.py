@@ -15,7 +15,6 @@ from server import Server
 # from raspberry.range_sensor import sensor
 # from raspberry.server import Server
 
-status = ""
 
 t = 0.1
 fb_speed = 0
@@ -42,6 +41,7 @@ no_object = "no_object"
 run = 'Running'
 STOP = 'Stopped'
 MANUAL = 'Manual'
+status = run
 
 motor_status = 'stop'
 
@@ -215,7 +215,6 @@ def auto_movement():
     global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_speed, fb_pid
     last_turn = 'L'
     no_object_loops = 0
-
     while True:
         if status == run:
 
@@ -225,8 +224,8 @@ def auto_movement():
             fb_update = fb_pid.update(area)
             fb_speed = percentage(fb_update, fb_pid.target)
             #
-            is_forward = fb_speed > 30
-            is_backward = fb_speed < -30
+            is_forward = fb_speed > 20
+            is_backward = fb_speed < -20
             fb_speed = max(0, min(100, abs(int(fb_speed))))
             fb_speed = int(map(fb_speed, 0, 100, 0, 50))
 
@@ -274,10 +273,12 @@ def auto_movement():
 
             if is_forward:
                 forwards(m_speed=fb_speed)
-                area += 400 * (fb_speed / 100)
+                width += 20 * (fb_speed / 100)
+                height += 20 * (fb_speed / 100)
             elif is_backward:
                 reverse(m_speed=fb_speed)
-                area -= 400 * (fb_speed / 100)
+                width -= 20 * (fb_speed / 100)
+                height -= 20 * (fb_speed / 100)
 
             time.sleep(0.05)
             turnright(m_speed=0)
@@ -289,13 +290,13 @@ def auto_movement():
             # time.sleep(0.2)
         elif status == no_object:
             print('********** No Object **********')
-            if no_object_loops < 5:
+            if no_object_loops < 15:
                 no_object_loops += 1
                 if last_turn == 'R':
                     turnright(m_speed=50)
                 else:
                     turnleft(m_speed=50)
-                time.sleep(0.1)
+                time.sleep(0.05)
                 stopall()
                 time.sleep(0.5)
         else:

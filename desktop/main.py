@@ -16,6 +16,7 @@ def main(ip, port, url=None):
 
 
 if __name__ == '__main__':
+    # videoURL = 0
     videoURL = "http://raspberrypi:8080/stream/video.mjpeg"
     IP = "raspberrypi"
     PORT = 1234

@@ -1,13 +1,14 @@
 import json
 import threading
 import time
+
 import RPi.GPIO as GPIO
 import netifaces as ni
 import pigpio
-from raspberry.motor_controller import QuadMotorController
-from raspberry.pid import PID
-from raspberry.range_sensor import sensor
-from raspberry.server import Server
+from motor_controller import QuadMotorController
+from pid import PID
+from range_sensor import sensor
+from server import Server
 
 status = ""
 
@@ -127,7 +128,7 @@ def stopall():
 
 
 def movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid, area
     print("started")
 
     while True:
@@ -161,6 +162,7 @@ def movement():
             y = json_message.get("y")
             width = json_message.get("width")
             height = json_message.get("height")
+            area = width * height
             print("x = {}, y = {}, width = {}, height = {}".format(x, y, width, height))
             if x == 0 and y == 0 and width == 0 and height == 0:
                 status = no_object
@@ -203,7 +205,7 @@ def map(value, istart, istop, ostart, ostop):
 
 
 def auto_movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_speed, fb_pid
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_speed, fb_pid, area
     last_turn = 'L'
     no_object_loops = 0
 
@@ -212,15 +214,13 @@ def auto_movement():
 
             no_object_loops = 0
 
-            area = width * height
-
             is_forward = area < minArea
             is_backward = area > maxArea
             is_right = x > 800
             is_left = x < 200
 
             lr_speed = 25
-            fb_speed = 25
+            fb_speed = 50
             if is_left:
                 turnleft(m_speed=lr_speed)
                 x += 100 * (lr_speed / 100)
@@ -232,14 +232,17 @@ def auto_movement():
 
             if is_forward:
                 forwards(m_speed=fb_speed)
-                # area += 600 * (fb_speed / 100)
+                area -= 20 * (lr_speed / 100)
+
             elif is_backward:
+                area += 20 * (lr_speed / 100)
                 reverse(m_speed=fb_speed)
-                # area -= 600 * (fb_speed / 100)
 
             time.sleep(0.1)
             turnright(m_speed=0)
-        elif status == no_object and False:
+            time.sleep(0.1)
+
+        elif status == no_object:
             if no_object_loops < 5:
                 no_object_loops += 1
                 if last_turn == 'R':
