@@ -240,12 +240,14 @@ class Ui(QtWidgets.QMainWindow, FormClass):
             maxArea = round(float(self.maxAreaEdit.text()), 2)
         except:
             maxArea = 100
+        is_keep_track = self.chk_keep_track.isChecked()
 
         verbose = {
             "x_min": x_min,
             "x_max": x_max,
             "maxArea": maxArea,
             "minArea": minArea,
+            "keepTrack": is_keep_track,
         }
         json_data = json.dumps(verbose)
         print(json_data)

@@ -114,7 +114,7 @@
       <x>10</x>
       <y>200</y>
       <width>251</width>
-      <height>321</height>
+      <height>331</height>
      </rect>
     </property>
     <property name="title">
@@ -252,7 +252,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>270</y>
+       <y>290</y>
        <width>151</width>
        <height>29</height>
       </rect>
@@ -264,12 +264,25 @@
       <string>Set </string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="chk_keep_track">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>270</y>
+       <width>131</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Keep Tracking </string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>530</y>
+      <y>560</y>
       <width>251</width>
       <height>111</height>
      </rect>

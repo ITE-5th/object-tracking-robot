@@ -23,9 +23,9 @@ MANUAL = 'Manual'
 fb_speed = 0
 lr_speed = 0
 
-x = 0
+x = 500
 y = 0
-area = 0
+area = 7000
 x_min = 200
 x_max = 800
 
@@ -40,8 +40,10 @@ no_object = "no_object"
 motor_status = 'stop'
 status = STOP
 # Used For optimizing no object status
+
+is_keep_track = False
 is_balanced = True
-no_obj_flag = True
+no_obj_flag = False
 
 
 def range_sensor_updater():
@@ -54,9 +56,10 @@ def range_sensor_updater():
             sonar.trigger()
             time.sleep(0.1)
             cms, new = sonar.get_centimetres()
-            if new:
-                range_sensor_value = cms
-                # print('range : {}'.format(range_sensor_value))
+            range_sensor_value = 100
+            # if new:
+            #     range_sensor_value = cms
+            #     # print('range : {}'.format(range_sensor_value))
         except Exception as e:
             print('range Sensor thread is stopped')
             print(e)
@@ -120,7 +123,7 @@ def stopall(force=False):
 
 
 def movement():
-    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid, area, no_obj_flag
+    global status, width, height, x_min, x_max, maxArea, minArea, x, y, fb_pid, lr_pid, area, no_obj_flag, is_keep_track
     print("started")
 
     while True:
@@ -143,6 +146,7 @@ def movement():
             x_max = json_message.get("x_max")
             maxArea = json_message.get("maxArea")
             minArea = json_message.get("minArea")
+            is_keep_track = json_message.get("keepTrack")
             fb_pid.target = (minArea + maxArea) / 2
             lr_pid.target = (x_min + x_max) / 2
 
@@ -163,7 +167,10 @@ def movement():
             area = width * height
             print("x = {}, y = {}, width = {}, height = {}".format(x, y, width, height))
             if x == 0 and y == 0 and width == 0 and height == 0:
-                no_obj_flag = True
+                if is_keep_track:
+                    no_obj_flag = True
+                else:
+                    status = no_object
             elif status == no_object:
                 status = run
                 no_obj_flag = False
