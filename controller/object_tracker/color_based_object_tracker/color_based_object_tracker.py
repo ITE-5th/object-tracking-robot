@@ -40,7 +40,7 @@ class ColorBasedObjectTracker(ObjectTracker):
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
             # only proceed if the radius meets a minimum size
-            if radius > 15:
+            if radius > 30:
                 values = "x ={} ,y = {}, r = {} ".format(int(x), int(y), round(radius, 2))
                 cv2.putText(frame, values, (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1000)
 

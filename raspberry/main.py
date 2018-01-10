@@ -228,16 +228,16 @@ def auto_movement():
             is_backward = fb_speed < -20
 
             fb_speed = max(0, min(100, abs(int(fb_speed))))
-            fb_speed = int(map(fb_speed, 0, 100, 0, 50))
+            fb_speed = int(map(fb_speed, 0, 100, 0, 100))
 
             lr_update = lr_pid.update(x)
             lr_speed = percentage(lr_update, lr_pid.target)
             #
-            is_left = lr_speed > 10
-            is_right = lr_speed < -10
+            is_left = lr_speed > 30
+            is_right = lr_speed < -30
             #
             lr_speed = max(0, min(100, abs(int(lr_speed))))
-            lr_speed = int(map(lr_speed, 0, 100, 0, 25))
+            lr_speed = int(map(lr_speed, 0, 100, 0, 75))
 
             print_status(area, fb_speed, is_left, is_right, lr_speed)
 
@@ -249,8 +249,7 @@ def auto_movement():
                 turnright(m_speed=lr_speed)
                 x -= 100 * (lr_speed / 100)
                 last_turn = 'R'
-
-            if is_forward:
+            elif is_forward:
                 forwards(m_speed=fb_speed)
                 area += 400 * (fb_speed / 100)
             elif is_backward:
@@ -261,15 +260,16 @@ def auto_movement():
                 status = no_object
             time.sleep(0.05)
             stopall()
-        elif status == no_object:
+        elif status == no_object\
+                :
             print('********** No Object **********')
-            if no_object_loops < 15:
+            if no_object_loops < 10:
                 no_object_loops += 1
                 if last_turn == 'R':
                     turnright(m_speed=50)
                 else:
                     turnleft(m_speed=50)
-                time.sleep(0.05)
+                time.sleep(0.1)
                 stopall()
                 time.sleep(0.5)
         else:
@@ -296,12 +296,12 @@ if __name__ == '__main__':
         range_sensor_thread = threading.Thread(target=range_sensor_updater)
         movement_thread = threading.Thread(target=movement)
         auto_movement_thread = threading.Thread(target=auto_movement)
-        range_sensor_thread.start()
+        # range_sensor_thread.start()
         movement_thread.start()
         auto_movement_thread.start()
 
         #  Join Thread to Stop together
-        range_sensor_thread.join()
+        # range_sensor_thread.join()
         movement_thread.join()
         auto_movement_thread.join()
 
