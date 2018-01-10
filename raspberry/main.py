@@ -260,8 +260,7 @@ def auto_movement():
                 status = no_object
             time.sleep(0.05)
             stopall()
-        elif status == no_object\
-                :
+        elif status == no_object:
             print('********** No Object **********')
             if no_object_loops < 10:
                 no_object_loops += 1
